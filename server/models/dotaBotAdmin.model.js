@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseHistory = require("mongoose-history");
 const Schema = mongoose.Schema;
 
-const dotaBotSchema = new Schema(
+const dotaBotAdminSchema = new Schema(
   {
     steamId64: String,
     accountName: {
@@ -24,16 +24,11 @@ const dotaBotSchema = new Schema(
       default: "BOT_OFFLINE",
     },
 
-    prevStatus:String,
+    prevStatus: String,
 
-    lobbyCount: {
-      //   allowNull: false,
-      //   type: DataTypes.INTEGER,
-      //   defaultValue: 0,
+    steam_guard_code:String,
 
-      type: Number,
-      default: 0,
-    },
+    
 
     password: String,
     //************************ */
@@ -54,6 +49,6 @@ const dotaBotSchema = new Schema(
   }
 );
 
-// dotaBotSchema.plugin(mongooseHistory);
+// dotaBotAdminSchema.plugin(mongooseHistory);
 
-module.exports = mongoose.model("dotabot", dotaBotSchema);
+module.exports = mongoose.model("dotabotAdmin", dotaBotAdminSchema);

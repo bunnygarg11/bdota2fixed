@@ -30,13 +30,19 @@ const _clearLobby = async (req, res, next) => {
         }
       }
 
-      for (let e of flag) {
-        await lobbyManager.removeBot(e);
-      }
+      setTimeout(() => {
 
-      await dotaBotModel
-        .updateMany({ _id: { $in: flag } }, { status: CONSTANTS.DELETED })
-        .exec();
+        for (let e of flag) {
+          await lobbyManager.removeBot(e);
+        }
+            await lobbyManager[CONSTANTS.EVENT_BOT_AVAILABLE]();
+
+      }, 3000)
+
+
+      // await dotaBotModel
+      //   .updateMany({ _id: { $in: flag } }, { status: CONSTANTS.DELETED })
+      //   .exec();
     }
 
     // Object.keys(lobbyManager.bots).forEach(async (e) => {
@@ -45,10 +51,13 @@ const _clearLobby = async (req, res, next) => {
 
     if (lobbyStateIds.length) {
       await dotaLobbyModel
-        .updateMany(
-          { _id: { $in: lobbyStateIds } },
-          { state: CONSTANTS.DELETED }
-        )
+        .updateMany({
+          _id: {
+            $in: lobbyStateIds
+          }
+        }, {
+          state: CONSTANTS.DELETED
+        })
         .exec();
     }
 
@@ -63,4 +72,6 @@ const _clearLobby = async (req, res, next) => {
   }
 };
 
-module.exports = { _clearLobby };
+module.exports = {
+  _clearLobby
+};

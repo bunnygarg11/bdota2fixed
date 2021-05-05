@@ -28,6 +28,8 @@ let dotalobby = new Schema({
     defaultValue: "STATE_NEW",
   },
 
+  prevstate:String,
+
   gameMode: {
     // allowNull: false,
     type: String,

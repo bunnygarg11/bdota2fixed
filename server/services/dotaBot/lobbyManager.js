@@ -9,7 +9,7 @@ const MatchTracker = require("./matchTracker");
 const CONSTANTS = require("./constants");
 const Db = require("./db");
 const Lobby = require("./lobby");
-// const Ihl = require("./ihl");
+
 const Fp = require("./util/fp");
 const equalsLong = require("./util/equalsLong");
 const DotaBot = require("./dotaBot");
@@ -394,7 +394,7 @@ class LobbyManager extends EventEmitter {
     if (lobbyState.state === CONSTANTS.STATE_MATCH_IN_PROGRESS) {
       await Db.updateLobbyState(lobbyState, CONSTANTS.STATE_MATCH_ENDED);
       logger.debug(
-        "ihlManager onMatchSignedOut state set to STATE_MATCH_ENDED"
+        "lobbyManager onMatchSignedOut state set to STATE_MATCH_ENDED"
       );
       this[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [
         CONSTANTS.STATE_MATCH_ENDED,
@@ -635,14 +635,14 @@ class LobbyManager extends EventEmitter {
         );
         this.bots[bot._id.toString()] = dotaBot;
         this.emit("bot-loaded", dotaBot); // test hook event
-        logger.debug("ihlManager loadBot loaded");
+        logger.debug("lobbyManager loadBot loaded");
       } catch (e) {
         logger.error(e);
         await Db.updateBotStatus(CONSTANTS.BOT_FAILED, bot._id.toString());
         return null;
       }
     }
-    logger.debug("ihlManager loadBot done");
+    logger.debug("lobbyManager loadBot done");
     return dotaBot;
   }
 
@@ -658,7 +658,7 @@ class LobbyManager extends EventEmitter {
       try {
         delete this.bots[botId];
         await DotaBot.disconnectDotaBot(dotaBot);
-        logger.debug("ihlManager removeBot removed");
+        logger.debug("lobbyManager removeBot removed");
       } catch (e) {
         logger.error(e);
         await Db.updateBotStatus(CONSTANTS.BOT_FAILED, botId);
