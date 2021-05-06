@@ -92,6 +92,9 @@ const EventListeners = ({ Db }) => ({
   async [CONSTANTS.EVENT_LOBBY_SWAP_TEAMS](lobbyState) {
     return this.queueEvent(this.onLobbySwapTeams, [lobbyState]);
   },
+  async [CONSTANTS.EVENT_LOBBY_BALANCE_TEAMS](lobbyState) {
+    return this.queueEvent(this.onLobbybalanceShuffle, [lobbyState]);
+  },
   async [CONSTANTS.EVENT_MATCH_OUTCOME](dotaLobbyId, matchOutcome, members) {
     return this.queueEvent(this.onMatchOutcome, [
       dotaLobbyId,
@@ -125,9 +128,7 @@ const EventListeners = ({ Db }) => ({
   },
   async [CONSTANTS.EVENT_DISABLE_MATCH_TRACKER]() {
     return this.queueEvent(this.disableMatchTracker);
-  }
-
-  
+  },
 });
 
 module.exports = EventListeners;

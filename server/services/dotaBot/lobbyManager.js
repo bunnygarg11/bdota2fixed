@@ -316,6 +316,19 @@ class LobbyManager extends EventEmitter {
   //   return false;
   // }
 
+  async onLobbybalanceShuffle(lobbyState) {
+    if (lobbyState.state !== CONSTANTS.STATE_WAITING_FOR_PLAYERS) return false;
+    const dotaBot = this.getBot(lobbyState.botId);
+    if (dotaBot) {
+      // await Db.updateLobbyRadiantFaction(lobbyState)(
+      //   3 - lobbyState.radiantFaction
+      // );
+      await dotaBot.balancedShuffleLobby();
+      return true;
+    }
+    return false;
+  }
+
   async onLobbyKick(lobbyState, user) {
     logger.debug(
       `LobbyManager onLobbyKick ${lobbyState._id} ${user} ${lobbyState.botId} ${user}`
