@@ -30,7 +30,7 @@ const _clearLobby = async (req, res, next) => {
         }
       }
 
-      setTimeout(() => {
+      setTimeout(async () => {
 
         for (let e of flag) {
           await lobbyManager.removeBot(e);
