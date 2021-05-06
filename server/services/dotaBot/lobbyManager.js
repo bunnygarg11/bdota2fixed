@@ -316,6 +316,19 @@ class LobbyManager extends EventEmitter {
   //   return false;
   // }
 
+  async onLobbybalanceShuffle(lobbyState) {
+    if (lobbyState.state !== CONSTANTS.STATE_WAITING_FOR_PLAYERS) return false;
+    const dotaBot = this.getBot(lobbyState.botId);
+    if (dotaBot) {
+      // await Db.updateLobbyRadiantFaction(lobbyState)(
+      //   3 - lobbyState.radiantFaction
+      // );
+      await dotaBot.balancedShuffleLobby();
+      return true;
+    }
+    return false;
+  }
+
   async onLobbyKick(lobbyState, user) {
     logger.debug(
       `LobbyManager onLobbyKick ${lobbyState._id} ${user} ${lobbyState.botId} ${user}`
@@ -404,11 +417,10 @@ class LobbyManager extends EventEmitter {
     await Lobby.unassignBotFromLobby(lobbyState);
   }
 
-  async disableMatchTracker(){
-    if(this.matchTracker.enabled){
-      this.matchTracker.disable()
+  async disableMatchTracker() {
+    if (this.matchTracker.enabled) {
+      this.matchTracker.disable();
     }
-
   }
 
   /**
@@ -520,9 +532,7 @@ class LobbyManager extends EventEmitter {
    */
 
   getBot(botId) {
-    logger.debug(
-      `LobbyManager getBot ${botId} `
-    );
+    logger.debug(`LobbyManager getBot ${botId} `);
     return botId != null ? this.bots[botId] : null;
   }
 

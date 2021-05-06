@@ -368,6 +368,7 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
     if (dotaBot) {
       if (DotaBot.isDotaLobbyReady(dotaBot.teamCache, dotaBot.playerState)) {
         logger.debug("lobby run isDotaLobbyReady true");
+        await this.onLobbybalanceShuffle(lobbyState);
         return this.onStartDotaLobby(lobbyState, dotaBot);
       }
     } else {

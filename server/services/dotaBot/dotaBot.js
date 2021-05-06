@@ -998,6 +998,25 @@ class DotaBot extends EventEmitter {
     }).timeout(5000);
   }
 
+  async balancedShuffleLobby() {
+    return new Promise((resolve) => {
+      this.schedule(() => {
+        if (this.lobby) {
+          logger.debug("DotaBot balancedShuffleLobby");
+          // for (const [steamId64, team] of Object.entries(this.teamCache)) {
+          //   this.teamCache[steamId64] = 3 - team;
+          // }
+          // flipLobbyTeams callback does not fire
+          this.Dota2.balancedShuffleLobby();
+          Promise.delay(1000).then(() => resolve(true));
+        } else {
+          logger.error("DotaBot balancedShuffleLobby missing lobby");
+          resolve(false);
+        }
+      });
+    }).timeout(5000);
+  }
+
   async launchPracticeLobby() {
     return new Promise((resolve, reject) => {
       this.schedule(() => {
