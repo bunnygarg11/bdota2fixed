@@ -288,9 +288,9 @@ class LobbyManager extends EventEmitter {
       }
       // await Lobby.removeQueuers(lobbyState);
       await Db.updateLobby(lobbyState);
-      this.matchTracker.addLobby(lobbyState);
-      if (!this.matchTracker.enabled) this.matchTracker.enable();
-      this.matchTracker.run();
+      // this.matchTracker.addLobby(lobbyState);
+      // if (!this.matchTracker.enabled) this.matchTracker.enable();
+      // this.matchTracker.run();
       // this[CONSTANTS.MSG_LOBBY_STARTED](lobbyState);
       logger.debug("LobbyManager onStartDotaLobby true");
     }

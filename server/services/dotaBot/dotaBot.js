@@ -158,6 +158,7 @@ const defaultLobbyOptions = {
   allchat: true,
   visibility: Dota2.schema.DOTALobbyVisibility.DOTALobbyVisibility_Public,
   cm_pick: Dota2.schema.DOTA_CM_PICK.DOTA_CM_RANDOM,
+  leagueid: 13130
 };
 
 const createSteamClient = () => new steam.SteamClient();
@@ -445,6 +446,8 @@ class DotaBot extends EventEmitter {
         lobby.match_outcome ===
           Dota2.schema.EMatchOutcome.k_EMatchOutcome_DireVictory
       ) {
+
+        logger.debug(`dotaBot EVENT_MATCH_OUTCOME  `);
         this.emit(
           CONSTANTS.EVENT_MATCH_OUTCOME,
           lobby.lobby_id,

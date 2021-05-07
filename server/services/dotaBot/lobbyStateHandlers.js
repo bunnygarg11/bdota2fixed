@@ -380,7 +380,8 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
   [CONSTANTS.STATE_MATCH_ENDED]: lobbyStateNoOp,
   async [CONSTANTS.STATE_MATCH_STATS](_lobbyState) {
     let lobbyState = { ..._lobbyState };
-    // await MatchTracker.updatePlayerRatings(lobbyState);
+    await MatchTracker.setMatchDetails(lobbyState);
+    await MatchTracker.setMatchPlayerDetails(lobbyState);
     lobbyState.state = CONSTANTS.STATE_COMPLETED;
     await Db.updateLobby(lobbyState);
     await this.botLeaveLobby(lobbyState);
