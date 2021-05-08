@@ -169,11 +169,12 @@ const addPlayer = (lobbyOrState, player) => Db.addPlayer(lobbyOrState, player);
 const updateLobbyPlayerBySteamId = async(data, lobbyOrState, steamId64) => {
   // if (lobbyOrState.players.indexOf(steamId64==-1)){return false}
    return await Db.findOrCreateLobbyPlayer({
-      ...data,
-      lobbyId: lobbyOrState._id,
-      steamId64,
-      lobbyName: lobbyOrState.lobbyName,
-    });
+     ...data,
+     lobbyId: lobbyOrState._id,
+     steamId64,
+     lobbyName: lobbyOrState.lobbyName,
+     matchId: lobbyOrState.matchId
+   });
 };
 module.exports = {
   

@@ -875,3 +875,31 @@ module.exports.findOrCreateLobbyPlayer = async (lobbyPlayer) => {
     throw err.message;
   }
 };
+
+module.exports.getLobbyPlayer = async (steamId64) => {
+  try {
+    let result = await dotaLobbyPlayerModel
+      .find(
+        {
+          steamId64,
+        },
+        lobbyPlayer,
+        { new: true }
+      )
+      .lean(true)
+      .exec();
+
+    if (result) {
+      return result;
+    }
+
+    result = await dotaLobbyPlayerModel.create(lobbyPlayer);
+
+    return result._doc;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
+

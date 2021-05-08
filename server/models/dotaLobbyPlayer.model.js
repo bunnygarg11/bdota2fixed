@@ -50,6 +50,7 @@ let dotaLobbyPlayer = new Schema({
 
   steamId64: String,
   lobbyName: String,
+  matchId:String,
 
   /*************************************************************/
   //   name: { type: String, required: true },
@@ -74,6 +75,6 @@ let dotaLobbyPlayer = new Schema({
   updatedOn: { type: Date, default: Date.now },
 });
 
-dotaLobbyPlayer.plugin(paginate);
+// dotaLobbyPlayer.plugin(paginate);
 
 module.exports = mongoose.model("dotaLobbyPlayer", dotaLobbyPlayer);

@@ -1,5 +1,3 @@
-
-
 const { EventEmitter } = require("events");
 const getBymatchId = require("../dotaApi").getBymatchId;
 const convertor = require("steam-id-convertor");
@@ -77,7 +75,7 @@ const getOpenDotaMatchDetails = async (matchId) => {
     //   { json: true }
     // );
 
-    const response = await getBymatchId(matchId); ;
+    const response = await getBymatchId(matchId);
     return response.match_id ? response : null;
   } catch (e) {
     logger.error(e);
@@ -85,18 +83,18 @@ const getOpenDotaMatchDetails = async (matchId) => {
   }
 };
 
-
-
 const setMatchDetails = async (lobbyOrState) => {
   logger.debug(`matchTracker setMatchDetails matchId ${lobbyOrState.matchId}`);
   let lobby = await Lobby.getLobby(lobbyOrState);
   logger.debug(
-    `matchTracker setMatchDetails lobby.id ${lobby._id.toString()} ${lobby.matchId}`
+    `matchTracker setMatchDetails lobby.id ${lobby._id.toString()} ${
+      lobby.matchId
+    }`
   );
   if (!lobby.odotaData) {
     const odotaData = await getOpenDotaMatchDetails(lobby.matchId);
     if (odotaData) {
-      await Db.updateLobby({
+      lobby = await Db.updateLobby({
         odotaData,
         finishedAt: odotaData.start_time + odotaData.duration * 1000,
         _id: lobby._id,
@@ -129,20 +127,20 @@ const setMatchPlayerDetails = async (_lobby) => {
           xpm: playerData.xp_per_min,
         };
         // if (player.id === lobby.captain1UserId) {
-          if (playerData.win === 1) {
-            winner = 1;
-          }
+        if (playerData.win === 1) {
+          winner = 1;
+        }
         // } else if (player.id === lobby.captain2UserId) {
-          // if (playerData.win === 1) {
-            // winner = 2;
-          // }
+        // if (playerData.win === 1) {
+        // winner = 2;
         // }
-        tasks.push(Lobby.updateLobbyPlayerBySteamId(data,_lobby,steamId64));
+        // }
+        tasks.push(Lobby.updateLobbyPlayerBySteamId(data, _lobby, steamId64));
       }
     }
   }
   await Fp.allPromise(tasks);
-  await Db.updateLobbyWinner(lobby,winner);
+  await Db.updateLobbyWinner(lobby, winner);
 };
 
 const createMatchEndMessageEmbed = async (matchId) => {
@@ -272,6 +270,7 @@ class MatchTracker extends EventEmitter {
   }
 
   addLobby(lobby) {
+    logger.debug(`matchTracker addLobby  lobby ${lobby}`);
     this.lobbies.push({
       lobby,
       lastCheck: null,
@@ -297,14 +296,17 @@ class MatchTracker extends EventEmitter {
       this.blocking = true;
       const data = this.lobbies.shift();
       if (!data.lastCheck || data.lastCheck < Date.now() - this.interval) {
+        logger.debug(`matchTracker run lastCheck ${data.lastCheck} `);
         data.lastCheck = Date.now();
         const lobby = await setMatchDetails(data.lobby);
         if (lobby.odotaData) {
+          logger.debug(`matchtracker run setMatchPlayerDetails`);
           await setMatchPlayerDetails(lobby);
-          this.emit(CONSTANTS.EVENT_MATCH_STATS, lobby);
+          // this.emit(CONSTANTS.EVENT_MATCH_STATS, lobby);
         } else if (
           lobby.state === CONSTANTS.STATE_MATCH_IN_PROGRESS ||
-          lobby.state === CONSTANTS.STATE_MATCH_ENDED
+          lobby.state === CONSTANTS.STATE_MATCH_ENDED ||
+          lobby.state === CONSTANTS.STATE_MATCH_STATS
         ) {
           logger.debug(`matchTracker no data, queueing ${lobby._id}`);
           // startedAtExpiration is four hours before the current time
@@ -312,6 +314,9 @@ class MatchTracker extends EventEmitter {
           const startedAtExpiration = new Date();
           startedAtExpiration.setHours(startedAtExpiration.getHours() - 4);
           if (lobby.startedAt > startedAtExpiration) {
+            logger.debug(
+              `matchTracker push ${lobby.startedAt - startedAtExpiration} `
+            );
             this.lobbies.push(data);
           } else {
             this.emit(CONSTANTS.EVENT_MATCH_NO_STATS, lobby);
@@ -320,7 +325,7 @@ class MatchTracker extends EventEmitter {
 
         if (this.lobbies.length) {
           logger.debug("matchTracker looping");
-          this.runTimer = setTimeout(() => this.run(), 1000);
+          this.runTimer = setTimeout(async () => await this.run(), 1000);
         }
       } else {
         data.lastCheck = Date.now();

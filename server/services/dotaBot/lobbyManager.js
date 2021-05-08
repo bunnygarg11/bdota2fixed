@@ -25,7 +25,7 @@ const setMatchPlayerDetails = (matchOutcome) => (members) => async (_lobby) => {
   const tasks = [];
   for (const playerData of members) {
     const steamId64 = playerData.id.toString();
-    const player = players.find((p) => p== steamId64);
+    const player = players.find((p) => p == steamId64);
     if (player) {
       const data = {
         // win: 0,
@@ -50,7 +50,7 @@ const setMatchPlayerDetails = (matchOutcome) => (members) => async (_lobby) => {
       } else {
         data.lose = 1;
       }
-      tasks.push(Lobby.updateLobbyPlayerBySteamId(data,_lobby,steamId64));
+      tasks.push(Lobby.updateLobbyPlayerBySteamId(data, _lobby, steamId64));
     }
   }
   await Fp.allPromise(tasks);
@@ -404,11 +404,10 @@ class LobbyManager extends EventEmitter {
     await Lobby.unassignBotFromLobby(lobbyState);
   }
 
-  async disableMatchTracker(){
-    if(this.matchTracker.enabled){
-      this.matchTracker.disable()
+  async disableMatchTracker() {
+    if (this.matchTracker.enabled) {
+      this.matchTracker.disable();
     }
-
   }
 
   /**
@@ -520,9 +519,7 @@ class LobbyManager extends EventEmitter {
    */
 
   getBot(botId) {
-    logger.debug(
-      `LobbyManager getBot ${botId} `
-    );
+    logger.debug(`LobbyManager getBot ${botId} `);
     return botId != null ? this.bots[botId] : null;
   }
 
@@ -734,7 +731,6 @@ Object.assign(
   })
 );
 Object.assign(LobbyManager.prototype, EventListeners({ Db }));
-
 
 // module.exports = {
 //   findUser,

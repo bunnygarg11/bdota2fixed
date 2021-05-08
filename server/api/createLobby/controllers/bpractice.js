@@ -10,24 +10,40 @@ var Services = require("../../../services/network");
 
 const _bpractice = async (req, res, next) => {
   try {
-    // let lobby = await dotaLobbyModel.findOne({
-    //   gameMode: "DOTA_GAMEMODE_1V1MID",
-    // }).lean(true).exec();
+
+
+    let lobby = await dotaLobbyModel.findOne({
+      gameMode: "DOTA_GAMEMODE_1V1MID",
+    }).lean(true).exec();
+
+    await lobbyManager[CONSTANTS.EVENT_RUN_LOBBY](lobby, [
+      CONSTANTS.STATE_MATCH_STATS,
+    ]).catch((e) => logger.error(e));
+
+
+
+    // const startedAtExpiration = new Date();
+    // startedAtExpiration.setHours(startedAtExpiration.getHours() - 4);
+
+    // console.log(lobby.startedAt > startedAtExpiration);
+    // console.log(lobby.startedAt -startedAtExpiration);
+    // console.log(typeof lobby.startedAt);
+    // console.log(typeof startedAtExpiration);
     // let bot = await dotaBotModel.findOne({ status: "BOT_IDLE" }).lean(true).exec();
 
     // console.log("lobbyState", lobby);
 
     // console.log("dotaState", bot);
 
-  let flag=Object.keys(lobbyManager.bots)  
+  // let flag=Object.keys(lobbyManager.bots)  
 
-  console.log(flag);
-  console.log(lobbyManager.bots);
+  // console.log(flag);
+  // console.log(lobbyManager.bots);
 
     return Services._response(
       res,
-      // { lobby, bot },
-      {},
+      { lobby},
+      
       "Invitation sent. Please open your dota client to play the game"
     );
   } catch (error) {
