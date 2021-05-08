@@ -2,7 +2,7 @@ const heroes = require("dotaconstants/build/heroes.json");
 const itemIds = require("dotaconstants/build/item_ids.json");
 const items = require("dotaconstants/build/items.json");
 const Long = require("long");
-
+const Db=require("./dotaBot").Db
 const axios = require("axios").default;
 const dotaApiKey =
   process.env.DOTA2_API_KEY ||
@@ -64,6 +64,7 @@ module.exports.getProfileByGamerId = (gamerId) => {
 };
 
 module.exports.getBymatchId = (matchId) => {
+  
   let config = {
     method: "get",
     url: `matches/${matchId}`,

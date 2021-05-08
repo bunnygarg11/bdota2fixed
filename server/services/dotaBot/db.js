@@ -1,6 +1,7 @@
 var dotaBotModel = require("../../models/dotaBot.model");
 var dotaLobbyModel = require("../../models/dotaLobby.model");
 var dotaLobbyPlayerModel = require("../../models/dotaLobbyPlayer.model");
+var dotaMatchModel = require("../../models/dotaMatch.model");
 const util = require("util");
 
 const logger = require("./logger");
@@ -903,3 +904,51 @@ module.exports.getLobbyPlayer = async (steamId64) => {
 };
 
 
+
+
+
+
+
+
+
+
+module.exports.findMatchdata = async (matchId) => {
+  try {
+    let result = await dotaMatchModel
+      .findOne(
+        {
+          matchId,
+        }
+      )
+      .select("odotaData")
+      .lean(true)
+      .exec();
+
+    if (result) {
+      return result.odotaData;
+    }
+
+    // result = await dotaMatchModel.create(lobbyPlayer);
+
+    return null
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
+
+
+
+module.exports.CreateMatchData = async (matchId, odotaData) => {
+  try {
+    
+
+    let result = await dotaMatchModel.create({ matchId, odotaData });
+
+    return result._doc.odotaData;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
