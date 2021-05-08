@@ -2,7 +2,7 @@ const heroes = require("dotaconstants/build/heroes.json");
 const itemIds = require("dotaconstants/build/item_ids.json");
 const items = require("dotaconstants/build/items.json");
 const Long = require("long");
-const Db=require("./dotaBot").Db
+const Db = require("./dotaBot").Db;
 const axios = require("axios").default;
 const dotaApiKey =
   process.env.DOTA2_API_KEY ||
@@ -63,41 +63,42 @@ module.exports.getProfileByGamerId = (gamerId) => {
     });
 };
 
-module.exports.getBymatchId = (matchId) => {
-  
+module.exports.getBymatchId = async (matchId) => {
+  let result = await Db.getBymatchId(matchId);
+
+  if (result) return result;
+
   let config = {
     method: "get",
     url: `matches/${matchId}`,
-    // headers: {
-    //   Accept: "application/json",
-    //   "Content-Type": "application/json",
-    //   Authorization: `Bearer ${dotaApiKey}`,
-    // },
   };
 
-  return AxiosInstance(config)
-    .then((resp) => resp.data)
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-        return error.response.data;
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an AxiosInstance of XMLHttpRequest in the browser and an AxiosInstance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-        return error.request;
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log("Error", error.message);
-        return error.message;
-      }
-      //   console.log(error.config);
-    });
+  try {
+    result = await AxiosInstance(config);
+    if (result.data) {
+      await Db.CreateMatchData(result.data);
+      return result.data;
+    }
+  } catch (error) {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      return error.response.data;
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an AxiosInstance of XMLHttpRequest in the browser and an AxiosInstance of
+      // http.ClientRequest in node.js
+      console.log(error.request);
+      return error.request;
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log("Error", error.message);
+      return error.message;
+    }
+  }
 };
 
 module.exports.getPlayerMatches = (gamerId) => {

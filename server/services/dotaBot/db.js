@@ -839,6 +839,46 @@ module.exports.removePlayer = async (lobbyOrState, player) => {
   }
 };
 
+module.exports.updateManyLobby = async (lobby) => {
+  try {
+    await dotaLobbyModel
+      .updateMany(
+        {
+          _id: {
+            $in: lobby,
+          },
+        },
+        {
+          setMatchPlayerDetails: true,
+        }
+      )
+      .exec();
+    logger.debug(`DB updateManyLobby  `);
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
+module.exports.findAllLobbies = async (lobby) => {
+  try {
+    const result = await dotaLobbyModel
+      .find({
+        _id: {
+          $in: lobby,
+        },
+      })
+      .lean(true)
+      .exec();
+    logger.debug(`DB findAllLobbies  --> ${util.inspect(result)}`);
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
 //**********************************************************LOBBYPLAYER MODEL***************************************************************************************************************************** */
 //**********************************************************LOBBYPLAYER MODEL***************************************************************************************************************************** */
 //**********************************************************LOBBYPLAYER MODEL***************************************************************************************************************************** */
@@ -878,6 +918,7 @@ module.exports.getLobbyPlayerMatchStats = async (steamId64) => {
       })
       .lean(true)
       .exec();
+    logger.debug(`DB getLobbyPlayerMatchStats  --> ${util.inspect(result)}`);
 
     return result;
   } catch (err) {
@@ -895,6 +936,9 @@ module.exports.getPendingLobbyPlayerMatchStats = async (steamId64) => {
       })
       .lean(true)
       .exec();
+    logger.debug(
+      `DB getPendingLobbyPlayerMatchStats  --> ${util.inspect(result)}`
+    );
 
     return result;
   } catch (err) {
@@ -902,6 +946,10 @@ module.exports.getPendingLobbyPlayerMatchStats = async (steamId64) => {
     throw err.message;
   }
 };
+
+//**********************************************************DOTAMATCH MODEL***************************************************************************************************************************** */
+//**********************************************************DOTAMATCH MODEL***************************************************************************************************************************** */
+//**********************************************************DOTAMATCH MODEL***************************************************************************************************************************** */
 
 module.exports.findMatchdata = async (matchId) => {
   try {
@@ -912,6 +960,7 @@ module.exports.findMatchdata = async (matchId) => {
       .select("odotaData")
       .lean(true)
       .exec();
+    logger.debug(`DB findMatchdata  --> ${util.inspect(result)}`);
 
     if (result) {
       return result.odotaData;
@@ -935,37 +984,4 @@ module.exports.CreateMatchData = async (matchId, odotaData) => {
     logger.error(err);
     throw err.message;
   }
-};
-
-module.exports.findAllLobbies = async (lobby) => {
-  try {
-    const result = await dotaLobbyModel
-      .find({
-        _id: {
-          $in: lobby,
-        },
-      })
-      .lean(true)
-      .exec();
-    logger.debug(`DB findAllLobbies  --> ${util.inspect(result)}`);
-    return result;
-  } catch (err) {
-    logger.error(err);
-    throw err.message;
-  }
-};
-
-module.exports.updateManyLobby = async (lobby) => {
-  await dotaLobbyModel
-    .updateMany(
-      {
-        _id: {
-          $in: lobby,
-        },
-      },
-      {
-        setMatchPlayerDetails: true,
-      }
-    )
-    .exec();
 };
