@@ -78,6 +78,11 @@ let dotalobby = new Schema({
 
   odotaData: Object,
 
+  setMatchPlayerDetails:{
+    type:Boolean,
+    default:false
+  },
+
   botId: {
     type: Schema.Types.ObjectId,
     ref: "dotabot",

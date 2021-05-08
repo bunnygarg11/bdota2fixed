@@ -20,7 +20,7 @@ let dotaLobbyPlayer = new Schema({
   kills: {
     // allowNull: false,
     type: Number,
-    default: 0,
+    default: -1,
   },
   deaths: {
     // allowNull: false,

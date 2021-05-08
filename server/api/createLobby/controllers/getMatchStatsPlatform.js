@@ -1,4 +1,5 @@
 const Db = require("../../../services/dotaBot").Db;
+const matchTracker = require("../../../services/dotaBot").matchTracker;
 const lobbyManager = require("../../../services/dotaBot").lobbyManager;
 const CONSTANTS = require("../../../services/dotaBot").CONSTANTS;
 const Lobby = require("../../../services/dotaBot").Lobby;
@@ -8,49 +9,38 @@ var Services = require("../../../services/network");
 const _getMatchStatsPlatform = async (req, res, next) => {
   //   const db = await coreDB.openDBConnnection();
   try {
-    const { steamId = "76561198177128005" } = req.query;
+    const { steamId } = req.query;
 
-    let lobbyState = await Db.findActiveLobbiesForUser(steamId);
-
-    if (lobbyState && lobbyState.length) {
+    if (!steamId) {
       return Services._validationError(res, "Already registered for lobby");
     }
 
-    lobbyState = await Db.findPendingLobby();
+    let pendingLobbyPlayerMatchStats = await Db.getPendingLobbyPlayerMatchStats(
+      steamId
+    );
 
-    if (lobbyState && lobbyState._id) {
-      lobbyState = await Db.addPlayer(lobbyState, steamId);
-    } else {
-      lobbyState = await Db.findOrCreateLobby(steamId);
-      // lobbyState = await Fp.pipeP(
-      //   Lobby.assignLobbyName,
-      //   Lobby.assignGameMode
-      // )(lobbyState);
-      lobbyState = await Lobby.assignLobbyName(lobbyState);
-      lobbyState = await Lobby.assignGameMode(lobbyState);
-      await Db.updateLobby(lobbyState);
-    }
-
-    if (
-      lobbyState.players.length == (process.env.PLAYER_COUNT_FOR_LOBBY || 2)
-    ) {
-      lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
-      await Db.updateLobby(lobbyState);
-
-      // lobbyManager.runLobby(lobbyState, [CONSTANTS.STATE_WAITING_FOR_BOT]);
-      await lobbyManager[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [
-        CONSTANTS.STATE_WAITING_FOR_BOT,
-      ]);
-
-      return Services._response(
-        res,
-        "Invitation sent. Please open your dota client to play the game",
-        "Invitation sent. Please open your dota client to play the game"
+    if (pendingLobbyPlayerMatchStats.length) {
+      pendingLobbyPlayerMatchStats = pendingLobbyPlayerMatchStats.map(
+        (e) => e.lobbyId
       );
+
+      let lobbystates = await Db.findAllLobbies(pendingLobbyPlayerMatchStats);
+
+      if (lobbystates.length) {
+        for (let e of lobbystates) {
+          let lobbystate = await matchTracker.setMatchDetails(e);
+          await matchTracker.setMatchPlayerDetails(lobbystate);
+        }
+
+        await Db.updateManyLobby(pendingLobbyPlayerMatchStats);
+      }
     }
+
+    let LobbyPlayerMatchStats = await Db.getLobbyPlayerMatchStats(steamId);
+
     return Services._response(
       res,
-      "waiting for the other player",
+      LobbyPlayerMatchStats,
       "waiting for the other player"
     );
   } catch (error) {

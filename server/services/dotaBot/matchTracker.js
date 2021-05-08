@@ -108,39 +108,42 @@ const setMatchDetails = async (lobbyOrState) => {
 
 const setMatchPlayerDetails = async (_lobby) => {
   const lobby = await Lobby.getLobby(_lobby);
-  const players = await Lobby.getPlayers(lobby);
-  let winner = 0;
-  const tasks = [];
-  for (const playerData of lobby.odotaData.players) {
-    if (playerData.account_id) {
-      const steamId64 = convertor.to64(playerData.account_id);
-      const player = players.find((p) => p == steamId64);
-      if (player) {
-        const data = {
-          win: playerData.win,
-          lose: playerData.lose,
-          heroId: playerData.hero_id,
-          kills: playerData.kills,
-          deaths: playerData.deaths,
-          assists: playerData.assists,
-          gpm: playerData.gold_per_min,
-          xpm: playerData.xp_per_min,
-        };
-        // if (player.id === lobby.captain1UserId) {
-        if (playerData.win === 1) {
-          winner = 1;
+
+  if (!lobby.setMatchPlayerDetails) {
+    const players = await Lobby.getPlayers(lobby);
+    let winner = 0;
+    const tasks = [];
+    for (const playerData of lobby.odotaData.players) {
+      if (playerData.account_id) {
+        const steamId64 = convertor.to64(playerData.account_id);
+        const player = players.find((p) => p == steamId64);
+        if (player) {
+          const data = {
+            win: playerData.win,
+            lose: playerData.lose,
+            heroId: playerData.hero_id,
+            kills: playerData.kills,
+            deaths: playerData.deaths,
+            assists: playerData.assists,
+            gpm: playerData.gold_per_min,
+            xpm: playerData.xp_per_min,
+          };
+          // if (player.id === lobby.captain1UserId) {
+          if (playerData.win === 1) {
+            winner = 1;
+          }
+          // } else if (player.id === lobby.captain2UserId) {
+          // if (playerData.win === 1) {
+          // winner = 2;
+          // }
+          // }
+          tasks.push(Lobby.updateLobbyPlayerBySteamId(data, _lobby, steamId64));
         }
-        // } else if (player.id === lobby.captain2UserId) {
-        // if (playerData.win === 1) {
-        // winner = 2;
-        // }
-        // }
-        tasks.push(Lobby.updateLobbyPlayerBySteamId(data, _lobby, steamId64));
       }
     }
+    await Fp.allPromise(tasks);
+    await Db.updateLobbyWinner(lobby, winner);
   }
-  await Fp.allPromise(tasks);
-  await Db.updateLobbyWinner(lobby, winner);
 };
 
 const createMatchEndMessageEmbed = async (matchId) => {
@@ -290,7 +293,9 @@ class MatchTracker extends EventEmitter {
    * @fires module:ihlManager~EVENT_MATCH_STATS
    */
   async run() {
-    logger.debug(`matchTracker run ${this.blocking}`);
+    logger.debug(
+      `matchTracker run ${this.blocking}  lobbylength ${this.lobbies.length}`
+    );
     if (this.blocking) return;
     if (this.enabled && this.lobbies.length) {
       this.blocking = true;
@@ -306,7 +311,8 @@ class MatchTracker extends EventEmitter {
         } else if (
           lobby.state === CONSTANTS.STATE_MATCH_IN_PROGRESS ||
           lobby.state === CONSTANTS.STATE_MATCH_ENDED ||
-          lobby.state === CONSTANTS.STATE_MATCH_STATS
+          lobby.state === CONSTANTS.STATE_MATCH_STATS ||
+          lobby.state === CONSTANTS.STATE_COMPLETED
         ) {
           logger.debug(`matchTracker no data, queueing ${lobby._id}`);
           // startedAtExpiration is four hours before the current time
@@ -328,8 +334,10 @@ class MatchTracker extends EventEmitter {
           this.runTimer = setTimeout(async () => await this.run(), 1000);
         }
       } else {
-        data.lastCheck = Date.now();
+        // data.lastCheck = Date.now();
         this.lobbies.push(data);
+        if (this.runTimer) clearTimeout(this.runTimer);
+        this.runTimer = setTimeout(async () => await this.run(), 1000);
       }
       this.blocking = false;
     }
