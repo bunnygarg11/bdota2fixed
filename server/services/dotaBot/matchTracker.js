@@ -127,6 +127,24 @@ const setMatchPlayerDetails = async (_lobby) => {
             assists: playerData.assists,
             gpm: playerData.gold_per_min,
             xpm: playerData.xp_per_min,
+
+            denies: playerData.denies || 0,
+            gold: playerData.gold || 0,
+            herodamage: playerData.hero_damage || 0,
+            herohealing: playerData.hero_healing || 0,
+            herohits: playerData.hero_hits || 0,
+            networth: playerData.net_worth || 0,
+
+            personaname: playerData.personaname,
+            duration: playerData.duration || 0,
+            ranktier: playerData.rank_tier || 0,
+            towerdamage: playerData.tower_damage || 0,
+            abandons: playerData.abandons || 0,
+            kda: playerData.kda || 0,
+            totalxp: playerData.total_xp || 0,
+            totalgold: playerData.total_gold || 0,
+            level: playerData.level || 0,
+            lasthits: playerData.last_hits || 0,
           };
           // if (player.id === lobby.captain1UserId) {
           if (playerData.win === 1) {

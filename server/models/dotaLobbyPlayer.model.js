@@ -32,6 +32,63 @@ let dotaLobbyPlayer = new Schema({
     type: Number,
     default: 0,
   },
+  denies: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  gold: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  herodamage: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  herohealing: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  herohits: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  networth: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  personaname: String,
+  duration: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  ranktier: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  towerdamage: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  abandons: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+  kda: {
+    // allowNull: false,
+    type: Number,
+    default: 0,
+  },
+
   gpm: {
     // allowNull: false,
     type: Number,
@@ -50,7 +107,7 @@ let dotaLobbyPlayer = new Schema({
 
   steamId64: String,
   lobbyName: String,
-  matchId:String,
+  matchId: String,
 
   /*************************************************************/
   //   name: { type: String, required: true },
