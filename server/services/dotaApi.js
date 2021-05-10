@@ -2,7 +2,7 @@ const heroes = require("dotaconstants/build/heroes.json");
 const itemIds = require("dotaconstants/build/item_ids.json");
 const items = require("dotaconstants/build/items.json");
 const Long = require("long");
-const Db = require("./dotaBot").Db;
+const Db = require("./dotaBot/db");
 const axios = require("axios").default;
 const dotaApiKey =
   process.env.DOTA2_API_KEY ||
@@ -64,10 +64,9 @@ module.exports.getProfileByGamerId = (gamerId) => {
 };
 
 module.exports.getBymatchId = async (matchId) => {
-  let result = await Db.getBymatchId(matchId);
+  let result = await Db.findMatchdata(matchId);
 
   if (result) return result;
-
   let config = {
     method: "get",
     url: `matches/${matchId}`,
@@ -76,7 +75,7 @@ module.exports.getBymatchId = async (matchId) => {
   try {
     result = await AxiosInstance(config);
     if (result.data) {
-      await Db.CreateMatchData(result.data);
+      await Db.CreateMatchData(matchId, result.data);
       return result.data;
     }
   } catch (error) {

@@ -911,6 +911,9 @@ module.exports.findAllLobbies = async (lobby) => {
 
 module.exports.findOrCreateLobbyPlayer = async (lobbyPlayer) => {
   try {
+    logger.debug(
+      `Db findOrCreateLobbyPlayer lobbyPlayer ${util.inspect(lobbyPlayer)}`
+    );
     let result = await dotaLobbyPlayerModel
       .findOneAndUpdate(
         {
