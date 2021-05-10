@@ -29,7 +29,8 @@ const _getMatchStatsPlatform = async (req, res, next) => {
       if (lobbystates.length) {
         for (let e of lobbystates) {
           let lobbystate = await matchTracker.setMatchDetails(e);
-          await matchTracker.setMatchPlayerDetails(lobbystate);
+          if (lobbystate.odotaData)
+            await matchTracker.setMatchPlayerDetails(lobbystate);
         }
 
         await Db.updateManyLobby(pendingLobbyPlayerMatchStats);

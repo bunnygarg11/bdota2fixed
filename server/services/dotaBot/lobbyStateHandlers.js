@@ -237,7 +237,9 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
     if (lobbyState.botId == null) {
       // const bot = await Db.findUnassignedBot(lobbyState.inhouseState);
       let bot = await Db.findUnassignedBot();
-      if (!bot) {
+      // let assignedbot = await Db.findassignedBot()
+//  if (!bot && !assignedbot.length) {
+      if (!bot && !Object.keys(this.bots).length) {
         let steamId64 = process.env.steamId64;
         let accountName = process.env.accountName;
         let personaName = process.env.personaName;

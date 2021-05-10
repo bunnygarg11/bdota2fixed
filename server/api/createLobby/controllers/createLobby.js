@@ -36,17 +36,18 @@ const _createsteamlobby = async (req, res, next) => {
     ) {
       lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
       await Db.updateLobby(lobbyState);
+      let assignedbot = await Db.findassignedBot();
+
+      let msg = assignedbot.length
+        ? "Invitation sent. Please open your dota client to play the game"
+        : "Bot is busy. Wait for sometime to recieve the invitation";
 
       // lobbyManager.runLobby(lobbyState, [CONSTANTS.STATE_WAITING_FOR_BOT]);
       await lobbyManager[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [
         CONSTANTS.STATE_WAITING_FOR_BOT,
       ]);
 
-      return Services._response(
-        res,
-        "Invitation sent. Please open your dota client to play the game",
-        "Invitation sent. Please open your dota client to play the game"
-      );
+      return Services._response(res, msg, msg);
     }
     return Services._response(
       res,
@@ -54,7 +55,7 @@ const _createsteamlobby = async (req, res, next) => {
       "waiting for the other player"
     );
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
     Services._handleError(res, "Error");
   }
 };

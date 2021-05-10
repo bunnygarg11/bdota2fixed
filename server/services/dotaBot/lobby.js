@@ -11,11 +11,11 @@ const Db = require("./db");
 const Fp = require("./util/fp");
 
 const getLobby = (lobbyOrState) => {
-  
   return Db.findLobbyById(lobbyOrState._id);
 };
 
-const getPlayers = (lobbyOrState) => Db.getLobbyPlayers(lobbyOrState).then(e=>e.players);
+const getPlayers = (lobbyOrState) =>
+  Db.getLobbyPlayers(lobbyOrState).then((e) => e.players);
 
 const getPlayerByUserId = (lobbyOrState, id) =>
   Db.getLobbyPlayers(lobbyOrState, { players: id });
@@ -28,7 +28,7 @@ const removePlayer = async (lobbyOrState, user) =>
 
 const unassignBotFromLobby = async (lobbyState) => {
   if (lobbyState.botId) {
-    await Db.unassignBotFromLobby(lobbyState,lobbyState.botId);
+    await Db.unassignBotFromLobby(lobbyState, lobbyState.botId);
   }
   return { ...lobbyState, botId: null, dotaLobbyId: null };
 };
@@ -39,14 +39,24 @@ const assignBotToLobby = async (lobbyState, botId) => {
 };
 
 const checkPlayers = async (lobbyState) => {
-  const players = await getPlayers(lobbyState);
-  if (players.length != (process.env.PLAYER_COUNT_FOR_LOBBY || 2)) {
+  try {
+    const players = await getPlayers(lobbyState);
+    if (players.length != (process.env.PLAYER_COUNT_FOR_LOBBY || 2)) {
+      return {
+        ...lobbyState,
+        state: CONSTANTS.STATE_FAILED,
+        failReason: `checkPlayers: invalid player count ${players.length}`,
+      };
+    }
+  } catch (e) {
+    logger.error(e);
     return {
       ...lobbyState,
       state: CONSTANTS.STATE_FAILED,
-      failReason: `checkPlayers: invalid player count ${players.length}`,
+      failReason: `checkPlayers: ${e.toString()}`,
     };
   }
+
   return { ...lobbyState };
 };
 
@@ -166,18 +176,17 @@ const assignGameMode = async (lobbyState) => ({
 });
 
 const addPlayer = (lobbyOrState, player) => Db.addPlayer(lobbyOrState, player);
-const updateLobbyPlayerBySteamId = async(data, lobbyOrState, steamId64) => {
+const updateLobbyPlayerBySteamId = async (data, lobbyOrState, steamId64) => {
   // if (lobbyOrState.players.indexOf(steamId64==-1)){return false}
-   return await Db.findOrCreateLobbyPlayer({
-     ...data,
-     lobbyId: lobbyOrState._id,
-     steamId64,
-     lobbyName: lobbyOrState.lobbyName,
-     matchId: lobbyOrState.matchId
-   });
+  return await Db.findOrCreateLobbyPlayer({
+    ...data,
+    lobbyId: lobbyOrState._id,
+    steamId64,
+    lobbyName: lobbyOrState.lobbyName,
+    matchId: lobbyOrState.matchId,
+  });
 };
 module.exports = {
-  
   updateLobbyPlayerBySteamId,
   getLobby,
   getPlayers,

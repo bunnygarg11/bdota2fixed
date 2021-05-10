@@ -212,6 +212,30 @@ module.exports.findUnassignedBot = async () => {
   }
 };
 
+
+
+module.exports.findassignedBot = async () => {
+  try {
+    const result = await dotaBotModel
+      .find({
+        status: {
+          $in: [
+            CONSTANTS.BOT_LOADING,
+            CONSTANTS.BOT_ONLINE,
+            CONSTANTS.BOT_IN_LOBBY,
+          ],
+        }
+      })
+      .lean(true)
+      .exec();
+    logger.debug(`DB findassignedBot   --> ${util.inspect(result)}`);
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
 module.exports.assignBotToLobby = async (lobby, botId) => {
   try {
     await dotaLobbyModel
@@ -847,6 +871,7 @@ module.exports.updateManyLobby = async (lobby) => {
           _id: {
             $in: lobby,
           },
+          state: { $ne: CONSTANTS.DELETED },
         },
         {
           setMatchPlayerDetails: true,
@@ -868,6 +893,7 @@ module.exports.findAllLobbies = async (lobby) => {
         _id: {
           $in: lobby,
         },
+        state: { $ne: CONSTANTS.DELETED },
       })
       .lean(true)
       .exec();
