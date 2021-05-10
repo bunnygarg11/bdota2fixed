@@ -39,8 +39,8 @@ const _createsteamlobby = async (req, res, next) => {
       let assignedbot = await Db.findassignedBot();
 
       let msg = assignedbot.length
-        ? "Invitation sent. Please open your dota client to play the game"
-        : "Bot is busy. Wait for sometime to recieve the invitation";
+        ? "Bot is busy. Wait for sometime to recieve the invitation"
+        : "Invitation sent. Please open your dota client to play the game";
 
       // lobbyManager.runLobby(lobbyState, [CONSTANTS.STATE_WAITING_FOR_BOT]);
       await lobbyManager[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [

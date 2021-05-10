@@ -96,7 +96,9 @@ const setMatchDetails = async (lobbyOrState) => {
     if (odotaData) {
       lobby = await Db.updateLobby({
         odotaData,
-        finishedAt: new Date(odotaData.start_time + odotaData.duration * 1000),
+        finishedAt: new Date(
+          (odotaData.start_time + odotaData.duration) * 1000
+        ),
         _id: lobby._id,
       });
     }
