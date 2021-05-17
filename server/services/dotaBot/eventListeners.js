@@ -22,14 +22,14 @@ const EventListeners = ({ Db }) => ({
     );
     if (
       lobby &&
-      lobby.botId != null &&
+      lobby.botId.toString() != null &&
       (lobby.state === CONSTANTS.STATE_BOT_STARTED ||
         lobby.state === CONSTANTS.STATE_WAITING_FOR_PLAYERS)
     ) {
       logger.debug(
         `EVENT_GUILD_MESSAGE {msg.member.displayName}: ${msg.content}`
       );
-      const dotaBot = this.getBot(lobby.botId);
+      const dotaBot = this.getBot(lobby.botId.toString());
       if (dotaBot) {
         await dotaBot.sendMessage(`${msg.member.displayName}: ${msg.content}`);
       }
@@ -70,14 +70,14 @@ const EventListeners = ({ Db }) => ({
     return this.queueEvent(this.onLobbyReady, [dotaLobbyId]);
   },
   async [CONSTANTS.EVENT_LOBBY_SET_FP](lobbyState, cmPick) {
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       return dotaBot.configPracticeLobby({ cm_pick: cmPick });
     }
     return false;
   },
   async [CONSTANTS.EVENT_LOBBY_SET_GAMEMODE](lobbyState, gameMode) {
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       return dotaBot.configPracticeLobby({ game_mode: gameMode });
     }

@@ -32,7 +32,7 @@ const _createsteamlobby = async (req, res, next) => {
     }
 
     if (
-      lobbyState.players.length == (process.env.PLAYER_COUNT_FOR_LOBBY || 2)
+      lobbyState.players.length >= (process.env.PLAYER_COUNT_FOR_LOBBY || 2)
     ) {
       lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
       await Db.updateLobby(lobbyState);

@@ -24,8 +24,10 @@ const _clearLobby = async (req, res, next) => {
     if (flag && flag.length) {
       if (lobbyState.length) {
         for (let e of lobbyState) {
-          if (flag.indexOf(e.botId) != -1) {
-            console.log("input");
+
+
+          if (flag.indexOf(e.botId.toString()) != -1) {
+            
             await lobbyManager[CONSTANTS.EVENT_LOBBY_LEAVE](e);
           }
         }

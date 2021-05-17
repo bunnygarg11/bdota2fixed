@@ -466,11 +466,11 @@ class DotaBot extends EventEmitter {
             } leaving lobby...`
           );
           return null;
-        } else if (lobbyState.botId != this.config._id.toString()) {
+        } else if (lobbyState.botId.toString() != this.config._id.toString()) {
           logger.debug(
-            `DotaBot practiceLobbyUpdate lobbyState.botId ${
-              lobbyState.botId
-            } mismatch. Bot ${this.config._id || "id"} leaving lobby...`
+            `DotaBot practiceLobbyUpdate lobbyState.botId ${lobbyState.botId} mismatch. Bot ${
+              this.config._id || "id"
+            } leaving lobby...`
           );
 
           // return null
