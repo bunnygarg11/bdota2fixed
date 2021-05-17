@@ -41,7 +41,7 @@ const assignBotToLobby = async (lobbyState, botId) => {
 const checkPlayers = async (lobbyState) => {
   try {
     const players = await getPlayers(lobbyState);
-    if (players.length != (process.env.PLAYER_COUNT_FOR_LOBBY || 2)) {
+    if (players.length < (process.env.PLAYER_COUNT_FOR_LOBBY || 2)) {
       return {
         ...lobbyState,
         state: CONSTANTS.STATE_FAILED,

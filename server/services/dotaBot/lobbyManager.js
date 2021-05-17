@@ -275,7 +275,7 @@ class LobbyManager extends EventEmitter {
       `LobbyManager onStartDotaLobby ${lobbyState._id} ${lobbyState.botId} ${lobbyState.state}`
     );
     if (lobbyState.state !== CONSTANTS.STATE_WAITING_FOR_PLAYERS) return false;
-    const dotaBot = _dotaBot || this.getBot(lobbyState.botId);
+    const dotaBot = _dotaBot || this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       lobbyState.state = CONSTANTS.STATE_MATCH_IN_PROGRESS;
       lobbyState.startedAt = Date.now();
@@ -316,11 +316,24 @@ class LobbyManager extends EventEmitter {
   //   return false;
   // }
 
+  async onLobbybalanceShuffle(lobbyState) {
+    if (lobbyState.state !== CONSTANTS.STATE_WAITING_FOR_PLAYERS) return false;
+    const dotaBot = this.getBot(lobbyState.botId.toString());
+    if (dotaBot) {
+      // await Db.updateLobbyRadiantFaction(lobbyState)(
+      //   3 - lobbyState.radiantFaction
+      // );
+      await dotaBot.balancedShuffleLobby();
+      return true;
+    }
+    return false;
+  }
+
   async onLobbyKick(lobbyState, user) {
     logger.debug(
       `LobbyManager onLobbyKick ${lobbyState._id} ${user} ${lobbyState.botId} ${user}`
     );
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       DotaBot.kickPlayer(dotaBot)(user);
     }
@@ -336,7 +349,7 @@ class LobbyManager extends EventEmitter {
     logger.debug(
       `LobbyManager onLobbyInvite ${lobbyState._id} ${user} ${lobbyState.botId} ${user}`
     );
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       DotaBot.invitePlayer(dotaBot)(user);
     }
@@ -453,9 +466,9 @@ class LobbyManager extends EventEmitter {
     // const lobbyState = await Lobby.lobbyToLobbyState(inhouseState)(lobby);
     // this[CONSTANTS.MSG_MATCH_STATS](lobbyState, inhouseState);
     await Db.updateLobbyState(lobby, CONSTANTS.STATE_MATCH_STATS);
-    this[CONSTANTS.EVENT_RUN_LOBBY](lobby, [
-      CONSTANTS.STATE_MATCH_STATS,
-    ]).catch((e) => logger.error(e));
+    this[CONSTANTS.EVENT_RUN_LOBBY](lobby, [CONSTANTS.STATE_MATCH_STATS]).catch(
+      (e) => logger.error(e)
+    );
   }
 
   /**
@@ -519,6 +532,7 @@ class LobbyManager extends EventEmitter {
    */
 
   getBot(botId) {
+    botId = botId.toString ? botId.toString() : botId;
     logger.debug(`LobbyManager getBot ${botId} `);
     return botId != null ? this.bots[botId] : null;
   }
@@ -650,10 +664,10 @@ class LobbyManager extends EventEmitter {
    */
   async removeBot(botId) {
     logger.debug(`LobbyManager removeBot ${botId}`);
-    const dotaBot = this.getBot(botId);
+    const dotaBot = this.getBot(botId.toString ? botId.toString() : botId);
     if (dotaBot) {
       try {
-        delete this.bots[botId];
+        delete this.bots[botId.toString ? botId.toString() : botId];
         await DotaBot.disconnectDotaBot(dotaBot);
         logger.debug("lobbyManager removeBot removed");
       } catch (e) {

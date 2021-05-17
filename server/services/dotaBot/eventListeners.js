@@ -22,14 +22,14 @@ const EventListeners = ({ Db }) => ({
     );
     if (
       lobby &&
-      lobby.botId != null &&
+      lobby.botId.toString() != null &&
       (lobby.state === CONSTANTS.STATE_BOT_STARTED ||
         lobby.state === CONSTANTS.STATE_WAITING_FOR_PLAYERS)
     ) {
       logger.debug(
         `EVENT_GUILD_MESSAGE {msg.member.displayName}: ${msg.content}`
       );
-      const dotaBot = this.getBot(lobby.botId);
+      const dotaBot = this.getBot(lobby.botId.toString());
       if (dotaBot) {
         await dotaBot.sendMessage(`${msg.member.displayName}: ${msg.content}`);
       }
@@ -70,14 +70,14 @@ const EventListeners = ({ Db }) => ({
     return this.queueEvent(this.onLobbyReady, [dotaLobbyId]);
   },
   async [CONSTANTS.EVENT_LOBBY_SET_FP](lobbyState, cmPick) {
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       return dotaBot.configPracticeLobby({ cm_pick: cmPick });
     }
     return false;
   },
   async [CONSTANTS.EVENT_LOBBY_SET_GAMEMODE](lobbyState, gameMode) {
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       return dotaBot.configPracticeLobby({ game_mode: gameMode });
     }
@@ -91,6 +91,9 @@ const EventListeners = ({ Db }) => ({
   },
   async [CONSTANTS.EVENT_LOBBY_SWAP_TEAMS](lobbyState) {
     return this.queueEvent(this.onLobbySwapTeams, [lobbyState]);
+  },
+  async [CONSTANTS.EVENT_LOBBY_BALANCE_TEAMS](lobbyState) {
+    return this.queueEvent(this.onLobbybalanceShuffle, [lobbyState]);
   },
   async [CONSTANTS.EVENT_MATCH_OUTCOME](dotaLobbyId, matchOutcome, members) {
     return this.queueEvent(this.onMatchOutcome, [
@@ -125,9 +128,7 @@ const EventListeners = ({ Db }) => ({
   },
   async [CONSTANTS.EVENT_DISABLE_MATCH_TRACKER]() {
     return this.queueEvent(this.disableMatchTracker);
-  }
-
-  
+  },
 });
 
 module.exports = EventListeners;

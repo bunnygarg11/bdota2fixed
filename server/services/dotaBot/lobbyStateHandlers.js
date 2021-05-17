@@ -339,7 +339,7 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
   },
   async [CONSTANTS.STATE_BOT_STARTED](_lobbyState) {
     const lobbyState = { ..._lobbyState };
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     const players = await Lobby.getPlayers(lobbyState);
 
     logger.debug(
@@ -366,10 +366,11 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
   },
   async [CONSTANTS.STATE_WAITING_FOR_PLAYERS](_lobbyState) {
     const lobbyState = { ..._lobbyState };
-    const dotaBot = this.getBot(lobbyState.botId);
+    const dotaBot = this.getBot(lobbyState.botId.toString());
     if (dotaBot) {
       if (DotaBot.isDotaLobbyReady(dotaBot.teamCache, dotaBot.playerState)) {
         logger.debug("lobby run isDotaLobbyReady true");
+        await this.onLobbybalanceShuffle(lobbyState);
         return this.onStartDotaLobby(lobbyState, dotaBot);
       }
     } else {

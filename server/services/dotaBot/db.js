@@ -38,6 +38,7 @@ module.exports.testFindAllActiveLobbies = () =>
           "STATE_BOT_CONNECTED",
           "STATE_WAITING_FOR_PLAYERS",
           "STATE_MATCH_IN_PROGRESS",
+          "STATE_WAITING_FOR_QUEUE",
         ],
       },
     })

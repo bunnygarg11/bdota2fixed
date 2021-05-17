@@ -466,11 +466,11 @@ class DotaBot extends EventEmitter {
             } leaving lobby...`
           );
           return null;
-        } else if (lobbyState.botId != this.config._id.toString()) {
+        } else if (lobbyState.botId.toString() != this.config._id.toString()) {
           logger.debug(
-            `DotaBot practiceLobbyUpdate lobbyState.botId ${
-              lobbyState.botId
-            } mismatch. Bot ${this.config._id || "id"} leaving lobby...`
+            `DotaBot practiceLobbyUpdate lobbyState.botId ${lobbyState.botId} mismatch. Bot ${
+              this.config._id || "id"
+            } leaving lobby...`
           );
 
           // return null
@@ -995,6 +995,25 @@ class DotaBot extends EventEmitter {
           Promise.delay(1000).then(() => resolve(true));
         } else {
           logger.error("DotaBot flipLobbyTeams missing lobby");
+          resolve(false);
+        }
+      });
+    }).timeout(5000);
+  }
+
+  async balancedShuffleLobby() {
+    return new Promise((resolve) => {
+      this.schedule(() => {
+        if (this.lobby) {
+          logger.debug("DotaBot balancedShuffleLobby");
+          // for (const [steamId64, team] of Object.entries(this.teamCache)) {
+          //   this.teamCache[steamId64] = 3 - team;
+          // }
+          // flipLobbyTeams callback does not fire
+          this.Dota2.balancedShuffleLobby();
+          Promise.delay(1000).then(() => resolve(true));
+        } else {
+          logger.error("DotaBot balancedShuffleLobby missing lobby");
           resolve(false);
         }
       });
