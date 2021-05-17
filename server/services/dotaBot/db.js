@@ -453,6 +453,37 @@ module.exports.findActiveLobbiesForUser = async (userId) => {
   }
 };
 
+
+
+module.exports.findActiveLobbiesFormultiUser = async (userIds) => {
+  try {
+    const result = await dotaLobbyModel
+      .find({
+        state: {
+          $nin: [
+            CONSTANTS.STATE_COMPLETED,
+            CONSTANTS.STATE_COMPLETED_NO_STATS,
+            CONSTANTS.STATE_KILLED,
+            CONSTANTS.STATE_FAILED,
+            CONSTANTS.DELETED,
+          ],
+        },
+        players: { $in: userIds },
+      })
+      .lean(true)
+      .exec();
+    logger.debug(
+      `DB findActiveLobbiesForUser userId ${userId}  --> ${util.inspect(
+        result
+      )}`
+    );
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
 module.exports.findPendingLobby = async () => {
   try {
     const result = await dotaLobbyModel
@@ -538,6 +569,26 @@ module.exports.findOrCreateLobby = async (player) => {
     throw err.message;
   }
 };
+
+
+
+module.exports.findOrCreatemultiLobby = async (player) => {
+  try {
+    let result = await dotaLobbyModel.create({
+      state: CONSTANTS.STATE_WAITING_FOR_QUEUE,
+      password: hri.random(),
+      // lobbyName,
+      players: player,
+    });
+
+    return result._doc;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
+
 
 module.exports.findLobbyByDotaLobbyId = async (dotaLobbyId) => {
   try {
