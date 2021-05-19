@@ -473,7 +473,7 @@ module.exports.findActiveLobbiesFormultiUser = async (userIds) => {
       .lean(true)
       .exec();
     logger.debug(
-      `DB findActiveLobbiesForUser userId ${userId}  --> ${util.inspect(
+      `DB findActiveLobbiesForUser userId ${userIds}  --> ${util.inspect(
         result
       )}`
     );

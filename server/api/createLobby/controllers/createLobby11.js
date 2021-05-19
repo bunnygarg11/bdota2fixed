@@ -10,6 +10,14 @@ const _createsteamlobbyy = async (req, res, next) => {
   try {
     const { players } = req.body;
 
+    if (
+      typeof players !== "object" ||
+      !Array.isArray(players) ||
+      players.length < 2
+    ) {
+      return Services._validationError(res, "provide valid list of players");
+    }
+
     let lobbyState = await Db.findActiveLobbiesFormultiUser(players);
 
     if (lobbyState && lobbyState.length) {
@@ -21,14 +29,14 @@ const _createsteamlobbyy = async (req, res, next) => {
     // if (lobbyState && lobbyState._id) {
     //   lobbyState = await Db.addPlayer(lobbyState, steamId);
     // } else {
-      lobbyState = await Db.findOrCreateLobbyPlayer(players);
-      // lobbyState = await Fp.pipeP(
-      //   Lobby.assignLobbyName,
-      //   Lobby.assignGameMode
-      // )(lobbyState);
-      lobbyState = await Lobby.assignLobbyName(lobbyState);
-      lobbyState = await Lobby.assignGameMode(lobbyState);
-      await Db.updateLobby(lobbyState);
+    lobbyState = await Db.findOrCreatemultiLobby(players);
+    // lobbyState = await Fp.pipeP(
+    //   Lobby.assignLobbyName,
+    //   Lobby.assignGameMode
+    // )(lobbyState);
+    lobbyState = await Lobby.assignLobbyName(lobbyState);
+    lobbyState = await Lobby.assignGameMode(lobbyState);
+    await Db.updateLobby(lobbyState);
     // }
 
     if (
@@ -49,11 +57,6 @@ const _createsteamlobbyy = async (req, res, next) => {
 
       return Services._response(res, msg, msg);
     }
-    return Services._response(
-      res,
-      "waiting for the other player",
-      "waiting for the other player"
-    );
   } catch (error) {
     logger.error(error);
     Services._handleError(res, "Error");

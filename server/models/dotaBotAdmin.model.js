@@ -6,20 +6,16 @@ const dotaBotAdminSchema = new Schema(
   {
     steamId64: String,
     accountName: {
-      //   allowNull: false,
 
       type: String,
     },
 
     personaName: {
-      //   allowNull: false,
       type: String,
     },
 
     status: {
-      //   allowNull: false,
-      //   type: DataTypes.STRING,
-      //   defaultValue: CONSTANTS.BOT_OFFLINE,
+      
       type: String,
       default: "BOT_OFFLINE",
     },
@@ -31,24 +27,12 @@ const dotaBotAdminSchema = new Schema(
     
 
     password: String,
-    //************************ */
-    // data: {
-    //   type: Object,
-    //   default: {},
-    // },
-    // players: {
-    //   type: Array,
-    //   default: [],
-    // },
-
-    // radiant_team: Object,
-    // dire_team: Object,
+   
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
   }
 );
 
-// dotaBotAdminSchema.plugin(mongooseHistory);
 
 module.exports = mongoose.model("dotabotAdmin", dotaBotAdminSchema);
