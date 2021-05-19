@@ -1028,6 +1028,26 @@ module.exports.getPendingLobbyPlayerMatchStats = async (steamId64) => {
   }
 };
 
+
+module.exports.getLobbyMatchStats = async (lobbyId) => {
+  try {
+    let result = await dotaLobbyPlayerModel
+      .find({
+        lobbyId,
+      })
+      .lean(true)
+      .exec();
+    logger.debug(
+      `DB getPendingLobbyPlayerMatchStats  --> ${util.inspect(result)}`
+    );
+
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
 //**********************************************************DOTAMATCH MODEL***************************************************************************************************************************** */
 //**********************************************************DOTAMATCH MODEL***************************************************************************************************************************** */
 //**********************************************************DOTAMATCH MODEL***************************************************************************************************************************** */

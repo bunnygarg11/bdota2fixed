@@ -55,7 +55,11 @@ const _createsteamlobbyy = async (req, res, next) => {
         CONSTANTS.STATE_WAITING_FOR_BOT,
       ]);
 
-      return Services._response(res, msg, msg);
+      return Services._response(
+        res,
+        { matchId: lobbyState._id.toString() },
+        msg
+      );
     }
   } catch (error) {
     logger.error(error);
