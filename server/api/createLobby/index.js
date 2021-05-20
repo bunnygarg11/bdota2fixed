@@ -6,6 +6,9 @@ const { _bpractice } = require("./controllers/bpractice");
 const { _clearLobby } = require("./controllers/clearLobby");
 const {_getMatchStatsPlatform } = require("./controllers/getMatchStatsPlatform");
 const {
+  _createsteamlobbyy,
+} = require("./controllers/createLobby11");
+const {
   _getMatchStats,
 } = require("./controllers/findMatchStats");
 const {
@@ -20,5 +23,6 @@ router.get("/clearLobby", _clearLobby);
 router.get("/getMatchStatsPlatform", _getMatchStatsPlatform);
 router.get("/getMatchStats", _getMatchStats);
 router.get("/bdota", _bdota);
+router.post("/createsteamlobbyy", _createsteamlobbyy);
 
 module.exports = router;

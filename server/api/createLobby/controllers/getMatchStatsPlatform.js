@@ -20,9 +20,11 @@ const _getMatchStatsPlatform = async (req, res, next) => {
     );
 
     if (pendingLobbyPlayerMatchStats.length) {
-      pendingLobbyPlayerMatchStats = pendingLobbyPlayerMatchStats.map(
-        (e) => e.lobbyId
+      pendingLobbyPlayerMatchStats = pendingLobbyPlayerMatchStats.map((e) =>
+        e.lobbyId.toString ? e.lobbyId.toString() : e.lobbyId
       );
+      pendingLobbyPlayerMatchStats = new Set(pendingLobbyPlayerMatchStats);
+      pendingLobbyPlayerMatchStats = Array.from(pendingLobbyPlayerMatchStats);
 
       let lobbystates = await Db.findAllLobbies(pendingLobbyPlayerMatchStats);
 

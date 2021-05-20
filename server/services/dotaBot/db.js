@@ -1034,6 +1034,7 @@ module.exports.getLobbyMatchStats = async (lobbyId) => {
     let result = await dotaLobbyPlayerModel
       .find({
         lobbyId,
+        kills: {$ne:-1},
       })
       .lean(true)
       .exec();

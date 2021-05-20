@@ -28,6 +28,14 @@ const _getMatchStats = async (req, res, next) => {
       let result = await Db.getLobbyMatchStats(matchId);
 
       if (result.length) return Services._response(res, result);
+      let _lobbystate = await matchTracker.setMatchDetails(lobbyState);
+      if (_lobbystate.odotaData) {
+        await matchTracker.setMatchPlayerDetails(_lobbystate);
+      }
+
+      await Db.updateManyLobby([_lobbystate._id.toString()]);
+      result = await Db.getLobbyMatchStats(matchId);
+      if (result.length) return Services._response(res, result);
 
       return Services._noContent(res, "No stats");
     }
