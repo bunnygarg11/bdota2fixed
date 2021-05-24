@@ -241,11 +241,9 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
 
       if (!bot) {
         let assignedSteamIds = this.getBotsAllSteamId();
-        if (assignedSteamIds) {
           dotaBotCredentials = await Db.findDotaBotCredentials(
             assignedSteamIds
           );
-        }
       }
       //  if (!bot && !Object.keys(this.bots).length) {
       if (!bot && dotaBotCredentials) {

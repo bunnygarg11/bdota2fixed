@@ -26,9 +26,9 @@ if (!dbUrl) {
   db.once("open", async () => {
     try {
       // logger.info("Connection open");
-      await dotaBotAdminModel.remove()
+      await dotaBotAdminModel.deleteMany({})
       await dotaBotAdminModel.insertMany(adminList);
-      await db.close();
+      // await db.close();
       // logger.info("Connection close");
     } catch (error) {
       // logger.info("Connection close abruptly");

@@ -52,6 +52,7 @@ module.exports.testFindAllActiveLobbies = () =>
           "STATE_WAITING_FOR_PLAYERS",
           "STATE_MATCH_IN_PROGRESS",
           "STATE_WAITING_FOR_QUEUE",
+          "STATE_WAITING_FOR_BOT",
         ],
       },
     })
@@ -409,6 +410,22 @@ module.exports.destroyBotBySteamID64 = async (steamId64) => {
 
 module.exports.findDotaBotCredentials = async (steamId64s) => {
   try {
+
+    if(!steamId64s){
+      const result = await dotaBotAdminModel
+        .findOne({
+          
+          status: "ACTIVE",
+        })
+        .lean(true)
+        .exec();
+      logger.debug(
+        `DB findDotaBotCredentials   --> ${util.inspect(
+          result
+        )} `
+      );
+      return result;
+    }
     const result = await dotaBotAdminModel
       .findOne({
         steamId64: {
