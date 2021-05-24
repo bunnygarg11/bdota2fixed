@@ -1,10 +1,23 @@
-const LobbyManager= require("./lobbyManager");
-let lobbyManager=new LobbyManager()
+const LobbyManager = require("./lobbyManager");
+const Db = require("./db");
+
+const CONSTANTS = require("./constants");
+const Lobby = require("./lobby");
+const logger = require("./logger");
+const matchTracker = require("./matchTracker");
+
+(async()=>{
+await require("./serverRestart").onRestart(Db);
+})()
+
+
+let lobbyManager = new LobbyManager();
+
 module.exports = {
-  Db: require("./db"),
+  Db,
   lobbyManager,
-  CONSTANTS: require("./constants"),
-  Lobby: require("./lobby"),
-  logger:require("./logger"),
-  matchTracker:require("./matchTracker")
+  CONSTANTS,
+  Lobby,
+  logger,
+  matchTracker,
 };

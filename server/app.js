@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 // var compression = require("compression");
 require("dotenv").config(path.resolve(process.cwd(), "./.env"));
+require("./seed/dotabotadmin")
 
 
 

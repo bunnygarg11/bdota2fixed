@@ -237,19 +237,31 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
     if (lobbyState.botId == null) {
       // const bot = await Db.findUnassignedBot(lobbyState.inhouseState);
       let bot = await Db.findUnassignedBot();
-      // let assignedbot = await Db.findassignedBot()
-//  if (!bot && !assignedbot.length) {
-      if (!bot && !Object.keys(this.bots).length) {
-        let steamId64 = process.env.steamId64;
-        let accountName = process.env.accountName;
-        let personaName = process.env.personaName;
-        let password = process.env.password;
-        //  let steam_guard_code=process.env.steam_guard_code
+      let dotaBotCredentials = null;
+
+      if (!bot) {
+        let assignedSteamIds = this.getBotsAllSteamId();
+        if (assignedSteamIds) {
+          dotaBotCredentials = await Db.findDotaBotCredentials(
+            assignedSteamIds
+          );
+        }
+      }
+      //  if (!bot && !Object.keys(this.bots).length) {
+      if (!bot && dotaBotCredentials) {
+        // let assignedbot = await Db.findassignedBot()
+        //  if (!bot && !assignedbot.length) {
+        let steamId64 = dotaBotCredentials.steamId64;
+        let accountName = dotaBotCredentials.accountName;
+        let personaName = dotaBotCredentials.personaName;
+        let password = dotaBotCredentials.password;
+        let steam_guard_code = dotaBotCredentials.steam_guard_code;
         bot = await Db.findOrCreateBot(
           steamId64,
           accountName,
           personaName,
-          password
+          password,
+          steam_guard_code
         );
       }
 
@@ -282,9 +294,8 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
             // leagueid: lobbyState.inhouseState.leagueid,
           };
           try {
-            const enterLobbyP = DotaBot.createDotaBotLobby(lobbyOptions)(
-              dotaBot
-            );
+            const enterLobbyP =
+              DotaBot.createDotaBotLobby(lobbyOptions)(dotaBot);
             const inLobby = await enterLobbyP;
             if (inLobby) {
               lobbyState.dotaLobbyId = dotaBot.dotaLobbyId.isZero()
