@@ -5,16 +5,14 @@ const CONSTANTS = require("./constants");
 const Lobby = require("./lobby");
 const logger = require("./logger");
 const matchTracker = require("./matchTracker");
+
 let lobbyManager = new LobbyManager();
 
+(async () => {
+  await require("./dotabotadmin")();
 
-(async()=>{
-
-  await lobbyManager.onClientReady()
-
-})()
-
-
+  await lobbyManager.onClientReady();
+})();
 
 module.exports = {
   Db,
