@@ -279,69 +279,77 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
   },
   async [CONSTANTS.STATE_BOT_ASSIGNED](_lobbyState) {
     let lobbyState = { ..._lobbyState };
-    if (lobbyState.botId != null) {
-      const dotaBot = await this.loadBotById(lobbyState.botId);
-      if (dotaBot) {
-        // check if bot is in another lobby already
-        if (dotaBot.dotaLobbyId && dotaBot.dotaLobbyId.isZero()) {
-          // const tickets = await DotaBot.loadDotaBotTickets(dotaBot);
-          // check if bot has ticket if needed
+    let botstatus=null
+    if (lobbyState.botId != null){
+      botstatus = await Db.findBot(lobbyState.botId);
 
-          const lobbyOptions = {
-            ...lobbyState,
-            // leagueid: lobbyState.inhouseState.leagueid,
-          };
-          try {
-            const enterLobbyP =
-              DotaBot.createDotaBotLobby(lobbyOptions)(dotaBot);
-            const inLobby = await enterLobbyP;
-            if (inLobby) {
-              lobbyState.dotaLobbyId = dotaBot.dotaLobbyId.isZero()
-                ? null
-                : dotaBot.dotaLobbyId.toString();
-              logger.debug(
-                `enterLobbyP dotaLobbyId: ${lobbyState.dotaLobbyId}`
-              );
-              lobbyState.state = CONSTANTS.STATE_BOT_STARTED;
+    }
+      if (
+        lobbyState.botId != null &&  botstatus &&
+        [CONSTANTS.BOT_ONLINE, CONSTANTS.BOT_OFFLINE].includes(botstatus.status)
+      ) {
+        const dotaBot = await this.loadBotById(lobbyState.botId);
+        if (dotaBot) {
+          // check if bot is in another lobby already
+          if (dotaBot.dotaLobbyId && dotaBot.dotaLobbyId.isZero()) {
+            // const tickets = await DotaBot.loadDotaBotTickets(dotaBot);
+            // check if bot has ticket if needed
+
+            const lobbyOptions = {
+              ...lobbyState,
+              // leagueid: lobbyState.inhouseState.leagueid,
+            };
+            try {
+              const enterLobbyP =
+                DotaBot.createDotaBotLobby(lobbyOptions)(dotaBot);
+              const inLobby = await enterLobbyP;
+              if (inLobby) {
+                lobbyState.dotaLobbyId = dotaBot.dotaLobbyId.isZero()
+                  ? null
+                  : dotaBot.dotaLobbyId.toString();
+                logger.debug(
+                  `enterLobbyP dotaLobbyId: ${lobbyState.dotaLobbyId}`
+                );
+                lobbyState.state = CONSTANTS.STATE_BOT_STARTED;
+                await Db.updateLobby(lobbyState);
+                logger.debug(
+                  `updateLobby done. ${lobbyState._id} ${lobbyState.state}`
+                );
+                logger.debug(
+                  `STATE_BOT_ASSIGNED to STATE_BOT_STARTED ${lobbyState._id} ${lobbyState.state}`
+                );
+              } else {
+                lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
+                lobbyState = await Lobby.unassignBotFromLobby(lobbyState);
+              }
+            } catch (e) {
+              logger.error(e);
+              this.removeBot(lobbyState.botId);
+              lobbyState.state = CONSTANTS.STATE_BOT_FAILED;
               await Db.updateLobby(lobbyState);
-              logger.debug(
-                `updateLobby done. ${lobbyState._id} ${lobbyState.state}`
-              );
-              logger.debug(
-                `STATE_BOT_ASSIGNED to STATE_BOT_STARTED ${lobbyState._id} ${lobbyState.state}`
-              );
-            } else {
-              lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
               lobbyState = await Lobby.unassignBotFromLobby(lobbyState);
             }
-          } catch (e) {
-            logger.error(e);
-            this.removeBot(lobbyState.botId);
-            lobbyState.state = CONSTANTS.STATE_BOT_FAILED;
-            await Db.updateLobby(lobbyState);
+            return lobbyState;
+          } else {
+            logger.debug(
+              `dotaLobbyId mismatch. lobbyState.dotaLobbyId ${lobbyState.dotaLobbyId} dotaBot.dotaLobbyId ${dotaBot.dotaLobbyId}`
+            );
+            lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
             lobbyState = await Lobby.unassignBotFromLobby(lobbyState);
-          }
-          return lobbyState;
-        } else {
-          logger.debug(
-            `dotaLobbyId mismatch. lobbyState.dotaLobbyId ${lobbyState.dotaLobbyId} dotaBot.dotaLobbyId ${dotaBot.dotaLobbyId}`
-          );
-          lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
-          lobbyState = await Lobby.unassignBotFromLobby(lobbyState);
-          await Db.updateBotStatusBySteamId(
-            CONSTANTS.BOT_IDLE,
-            dotaBot.steamId64
-          );
-          await dotaBot.leavePracticeLobby();
-          await dotaBot.abandonCurrentGame();
-          await dotaBot.leaveLobbyChat();
+            await Db.updateBotStatusBySteamId(
+              CONSTANTS.BOT_IDLE,
+              dotaBot.steamId64
+            );
+            await dotaBot.leavePracticeLobby();
+            await dotaBot.abandonCurrentGame();
+            await dotaBot.leaveLobbyChat();
 
-          // this[CONSTANTS.MSG_BOT_UNASSIGNED](lobbyState, "In another lobby.");
+            // this[CONSTANTS.MSG_BOT_UNASSIGNED](lobbyState, "In another lobby.");
+          }
         }
+        await Db.updateLobby(lobbyState);
+        return lobbyState;
       }
-      await Db.updateLobby(lobbyState);
-      return lobbyState;
-    }
     lobbyState.state = CONSTANTS.STATE_WAITING_FOR_BOT;
     await Db.updateLobby(lobbyState);
     return lobbyState;

@@ -68,7 +68,7 @@ class LobbyManager extends EventEmitter {
     this.eventQueue = [];
     this.blocking = false;
     this._runningLobby = false;
-    this.onClientReady();
+    // this.onClientReady();
   }
 
   /**
@@ -76,10 +76,11 @@ class LobbyManager extends EventEmitter {
    * @async
    * @fires module:ihlManager~ready
    */
-  onClientReady() {
+  async onClientReady() {
     // logger.debug(
     //   `LobbyManager onClientReady logged in as ${this.client.user.tag}`
     // );
+    await Db.setAllBotsOffline();
 
     this.matchTracker = new MatchTracker.MatchTracker(parseInt(5000));
     this.matchTracker.on(CONSTANTS.EVENT_MATCH_STATS, (lobby) =>
@@ -89,7 +90,25 @@ class LobbyManager extends EventEmitter {
       this[CONSTANTS.EVENT_MATCH_NO_STATS](lobby).catch((e) => logger.error(e))
     );
 
+    await Fp.mapPromise(this.runLobbiesForInhouse.bind(this))();
+    await this.matchTracker.loadLobbies();
+    this.matchTracker.run();
+
     // await Db.setAllBotsOffline();
+  }
+
+  async runLobbiesForInhouse() {
+    logger.silly(`ihlManager runLobbiesForInhouse `);
+    const lobbies = await Db.findAllActiveLobbies();
+    return Fp.allPromise(
+      lobbies.map((lobby) =>
+        Lobby.resetLobbyState(lobby).then((lobbyState) => {
+          this[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [lobbyState.state]).catch(
+            (e) => logger.error(e)
+          );
+        })
+      )
+    );
   }
 
   /**
@@ -556,8 +575,9 @@ class LobbyManager extends EventEmitter {
       // if (dotaBot.steamId64 === steamId64) return dotaBot;
       dotabotsSteamsids.push(dotaBot.steamId64);
     }
-    logger.debug(`LobbyManager getBotsAllSteamId ${util.inspect(dotabotsSteamsids)}`);
-
+    logger.debug(
+      `LobbyManager getBotsAllSteamId ${util.inspect(dotabotsSteamsids)}`
+    );
 
     return dotabotsSteamsids.length ? dotabotsSteamsids : null;
   }
