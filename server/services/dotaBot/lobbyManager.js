@@ -68,7 +68,7 @@ class LobbyManager extends EventEmitter {
     this.eventQueue = [];
     this.blocking = false;
     this._runningLobby = false;
-    this.onClientReady();
+    // this.onClientReady();
   }
 
   /**
@@ -80,6 +80,7 @@ class LobbyManager extends EventEmitter {
     // logger.debug(
     //   `LobbyManager onClientReady logged in as ${this.client.user.tag}`
     // );
+    await Db.setAllBotsOffline();
 
     this.matchTracker = new MatchTracker.MatchTracker(parseInt(5000));
     this.matchTracker.on(CONSTANTS.EVENT_MATCH_STATS, (lobby) =>
@@ -88,8 +89,6 @@ class LobbyManager extends EventEmitter {
     this.matchTracker.on(CONSTANTS.EVENT_MATCH_NO_STATS, (lobby) =>
       this[CONSTANTS.EVENT_MATCH_NO_STATS](lobby).catch((e) => logger.error(e))
     );
-
-    // await Db.setAllBotsOffline();
   }
 
   /**
