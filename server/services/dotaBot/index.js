@@ -5,13 +5,16 @@ const CONSTANTS = require("./constants");
 const Lobby = require("./lobby");
 const logger = require("./logger");
 const matchTracker = require("./matchTracker");
+let lobbyManager = new LobbyManager();
+
 
 (async()=>{
-await require("./serverRestart").onRestart(Db);
+
+  await lobbyManager.onClientReady()
+
 })()
 
 
-let lobbyManager = new LobbyManager();
 
 module.exports = {
   Db,
