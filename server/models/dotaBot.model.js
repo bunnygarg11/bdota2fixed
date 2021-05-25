@@ -17,9 +17,6 @@ const dotaBotSchema = new Schema(
     },
 
     status: {
-      //   allowNull: false,
-      //   type: DataTypes.STRING,
-      //   defaultValue: CONSTANTS.BOT_OFFLINE,
       type: String,
       default: "BOT_OFFLINE",
     },

@@ -276,14 +276,8 @@ class MatchTracker extends EventEmitter {
   }
 
   async loadLobbies() {
-    let lobbies = await Db.findAllInProgressLobbies();
-    this.lobbies.push(
-      ...lobbies.map((lobby) => ({
-        lobby,
-        lastCheck: null,
-      }))
-    );
-    lobbies = await Db.findAllMatchEndedLobbies();
+    
+   let lobbies = await Db.findAllMatchEndedLobbies();
     this.lobbies.push(
       ...lobbies.map((lobby) => ({
         lobby,

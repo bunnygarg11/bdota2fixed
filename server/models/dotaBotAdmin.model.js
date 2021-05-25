@@ -6,7 +6,6 @@ const dotaBotAdminSchema = new Schema(
   {
     steamId64: String,
     accountName: {
-
       type: String,
     },
 
@@ -15,19 +14,15 @@ const dotaBotAdminSchema = new Schema(
     },
 
     status: {
-      
       type: String,
-      default: "BOT_OFFLINE",
+      enum: ["INACTIVE", "ACTIVE", "START", "COMPLETED"],
+
+      default: "ACTIVE",
     },
 
-    prevStatus: String,
-
-    steam_guard_code:String,
-
-    
+    steam_guard_code: String,
 
     password: String,
-   
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

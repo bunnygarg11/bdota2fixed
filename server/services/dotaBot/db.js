@@ -2,6 +2,7 @@ var dotaBotModel = require("../../models/dotaBot.model");
 var dotaLobbyModel = require("../../models/dotaLobby.model");
 var dotaLobbyPlayerModel = require("../../models/dotaLobbyPlayer.model");
 var dotaMatchModel = require("../../models/dotaMatch.model");
+var dotaBotAdminModel = require("../../models/dotaBotAdmin.model");
 const util = require("util");
 
 const logger = require("./logger");
@@ -11,7 +12,19 @@ const { hri } = require("human-readable-ids");
 //***********TEST QUERY*************************************************************************************************************************************************************************** */
 //***********TEST QUERY*************************************************************************************************************************************************************************** */
 //***********TEST QUERY*************************************************************************************************************************************************************************** */
-
+module.exports.deleteLobbies = (lobbyStateIds) =>
+  dotaLobbyModel
+    .updateMany(
+      {
+        _id: {
+          $in: lobbyStateIds,
+        },
+      },
+      {
+        state: CONSTANTS.DELETED,
+      }
+    )
+    .exec();
 module.exports.updateQuery = () =>
   dotaLobbyModel.findOneAndUpdate(
     { gameMode: "DOTA_GAMEMODE_1V1MID" },
@@ -39,6 +52,7 @@ module.exports.testFindAllActiveLobbies = () =>
           "STATE_WAITING_FOR_PLAYERS",
           "STATE_MATCH_IN_PROGRESS",
           "STATE_WAITING_FOR_QUEUE",
+          "STATE_WAITING_FOR_BOT",
         ],
       },
     })
@@ -50,12 +64,12 @@ module.exports.testFindActiveBots = () =>
     .find({
       status: {
         $in: [
-          "BOT_LOADING",
-          "BOT_ONLINE",
-          "BOT_IDLE",
-          "BOT_IN_LOBBY",
-          "BOT_OFFLINE",
-          "BOT_FAILED",
+          CONSTANTS.BOT_LOADING,
+          CONSTANTS.BOT_ONLINE,
+          CONSTANTS.BOT_IDLE,
+          CONSTANTS.BOT_IN_LOBBY,
+          CONSTANTS.BOT_OFFLINE,
+          CONSTANTS.BOT_FAILED,
         ],
       },
     })
@@ -213,8 +227,6 @@ module.exports.findUnassignedBot = async () => {
   }
 };
 
-
-
 module.exports.findassignedBot = async () => {
   try {
     const result = await dotaBotModel
@@ -225,7 +237,7 @@ module.exports.findassignedBot = async () => {
             CONSTANTS.BOT_ONLINE,
             CONSTANTS.BOT_IN_LOBBY,
           ],
-        }
+        },
       })
       .lean(true)
       .exec();
@@ -396,6 +408,45 @@ module.exports.destroyBotBySteamID64 = async (steamId64) => {
   }
 };
 
+module.exports.findDotaBotCredentials = async (steamId64s) => {
+  try {
+
+    if(!steamId64s){
+      const result = await dotaBotAdminModel
+        .findOne({
+          
+          status: "ACTIVE",
+        })
+        .lean(true)
+        .exec();
+      logger.debug(
+        `DB findDotaBotCredentials   --> ${util.inspect(
+          result
+        )} `
+      );
+      return result;
+    }
+    const result = await dotaBotAdminModel
+      .findOne({
+        steamId64: {
+          $nin: steamId64s,
+        },
+        status: "ACTIVE",
+      })
+      .lean(true)
+      .exec();
+    logger.debug(
+      `DB findDotaBotCredentials   --> ${util.inspect(
+        result
+      )} steamId64s --> ${util.inspect(steamId64s)}`
+    );
+    const resultt = await this.findassignedBot();
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
 //**********************************************************LOBBY MODEL***************************************************************************************************************************** */
 //**********************************************************LOBBY MODEL***************************************************************************************************************************** */
 //**********************************************************LOBBY MODEL***************************************************************************************************************************** */
@@ -452,8 +503,6 @@ module.exports.findActiveLobbiesForUser = async (userId) => {
     throw err.message;
   }
 };
-
-
 
 module.exports.findActiveLobbiesFormultiUser = async (userIds) => {
   try {
@@ -570,8 +619,6 @@ module.exports.findOrCreateLobby = async (player) => {
   }
 };
 
-
-
 module.exports.findOrCreatemultiLobby = async (player) => {
   try {
     let result = await dotaLobbyModel.create({
@@ -587,8 +634,6 @@ module.exports.findOrCreatemultiLobby = async (player) => {
     throw err.message;
   }
 };
-
-
 
 module.exports.findLobbyByDotaLobbyId = async (dotaLobbyId) => {
   try {
@@ -1028,13 +1073,12 @@ module.exports.getPendingLobbyPlayerMatchStats = async (steamId64) => {
   }
 };
 
-
 module.exports.getLobbyMatchStats = async (lobbyId) => {
   try {
     let result = await dotaLobbyPlayerModel
       .find({
         lobbyId,
-        kills: {$ne:-1},
+        kills: { $ne: -1 },
       })
       .lean(true)
       .exec();

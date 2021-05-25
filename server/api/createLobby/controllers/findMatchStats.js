@@ -61,8 +61,10 @@ const _getMatchStats = async (req, res, next) => {
       case CONSTANTS.STATE_MATCH_IN_PROGRESS:
       case CONSTANTS.STATE_MATCH_ENDED:
       case CONSTANTS.STATE_MATCH_STATS:
-      case CONSTANTS.STATE_COMPLETED:
+      case CONSTANTS.STATE_COMPLETED: {
         msg = `The match is currently in progress`;
+        break;
+      }
 
       case CONSTANTS.STATE_BOT_FAILED:
       case CONSTANTS.STATE_MATCH_NO_STATS:

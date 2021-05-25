@@ -550,6 +550,18 @@ class LobbyManager extends EventEmitter {
     return null;
   }
 
+  getBotsAllSteamId() {
+    let dotabotsSteamsids = [];
+    for (const dotaBot of Object.values(this.bots)) {
+      // if (dotaBot.steamId64 === steamId64) return dotaBot;
+      dotabotsSteamsids.push(dotaBot.steamId64);
+    }
+    logger.debug(`LobbyManager getBotsAllSteamId ${util.inspect(dotabotsSteamsids)}`);
+
+
+    return dotabotsSteamsids.length ? dotabotsSteamsids : null;
+  }
+
   /**
    * Start a dota bot by id.
    * @async
