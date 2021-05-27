@@ -76,7 +76,7 @@ class LobbyManager extends EventEmitter {
    * @async
    * @fires module:ihlManager~ready
    */
-  onClientReady() {
+ async onClientReady() {
     // logger.debug(
     //   `LobbyManager onClientReady logged in as ${this.client.user.tag}`
     // );
@@ -99,8 +99,8 @@ class LobbyManager extends EventEmitter {
     this.unregisterLobbyTimeout(lobbyState);
     const delay = Math.max(
       0,
-      lobbyState.readyCheckTime +
-        lobbyState.inhouseState.readyCheckTimeout -
+      lobbyState.readyCheckTime.getTime() +
+        lobbyState.readyCheckTimeout -
         Date.now()
     );
     logger.debug(
@@ -247,7 +247,7 @@ class LobbyManager extends EventEmitter {
     logger.debug(`LobbyManager onLobbyTimedOut ${lobbyState._id}`);
     delete this.lobbyTimeoutTimers[lobbyState._id.toString()];
     this[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [
-      CONSTANTS.STATE_CHECKING_READY,
+      CONSTANTS.STATE_WAITING_FOR_PLAYERS,
     ]).catch((e) => logger.error(e));
   }
 
@@ -555,8 +555,9 @@ class LobbyManager extends EventEmitter {
       // if (dotaBot.steamId64 === steamId64) return dotaBot;
       dotabotsSteamsids.push(dotaBot.steamId64);
     }
-    logger.debug(`LobbyManager getBotsAllSteamId ${util.inspect(dotabotsSteamsids)}`);
-
+    logger.debug(
+      `LobbyManager getBotsAllSteamId ${util.inspect(dotabotsSteamsids)}`
+    );
 
     return dotabotsSteamsids.length ? dotabotsSteamsids : null;
   }
