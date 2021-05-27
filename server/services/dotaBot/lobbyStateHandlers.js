@@ -40,25 +40,25 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
       Lobby.assignGameMode
     )(lobbyState);
     logger.debug(`STATE_BEGIN_READY ${lobbyState._id} ${lobbyState.lobbyName}`);
-    lobbyState.channel = await Guild.setChannelName(lobbyState.lobbyName)(
-      lobbyState.channel
-    );
-    lobbyState.role = await Guild.setRoleName(lobbyState.lobbyName)(
-      lobbyState.role
-    );
-    await Guild.setChannelViewable(lobbyState.inhouseState.guild)(false)(
-      lobbyState.channel
-    );
-    await Guild.setChannelViewableForRole(lobbyState.inhouseState.adminRole)(
-      true
-    )(lobbyState.channel);
-    await Guild.setChannelViewableForRole(lobbyState.role)(true)(
-      lobbyState.channel
-    );
-    await Lobby.addRoleToPlayers(lobbyState);
+lobbyState.channel = await Guild.setChannelName(lobbyState.lobbyName)(
+  lobbyState.channel
+);
+lobbyState.role = await Guild.setRoleName(lobbyState.lobbyName)(
+  lobbyState.role
+);
+await Guild.setChannelViewable(lobbyState.inhouseState.guild)(false)(
+  lobbyState.channel
+);
+await Guild.setChannelViewableForRole(lobbyState.inhouseState.adminRole)(true)(
+  lobbyState.channel
+);
+await Guild.setChannelViewableForRole(lobbyState.role)(true)(
+  lobbyState.channel
+);
+await Lobby.addRoleToPlayers(lobbyState);
 
-    // destroy any accepted challenges for players
-    await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
+// destroy any accepted challenges for players
+await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
 
     if (!lobbyState.readyCheckTime) {
       lobbyState.readyCheckTime = Date.now();
@@ -241,9 +241,7 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
 
       if (!bot) {
         let assignedSteamIds = this.getBotsAllSteamId();
-          dotaBotCredentials = await Db.findDotaBotCredentials(
-            assignedSteamIds
-          );
+         dotaBotCredentials = await Db.findDotaBotCredentials(assignedSteamIds);
       }
       //  if (!bot && !Object.keys(this.bots).length) {
       if (!bot && dotaBotCredentials) {
@@ -364,6 +362,10 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
     dotaBot.teamCache = players;
     // await Lobby.mapPlayers(DotaBot.invitePlayer(dotaBot))(lobbyState);
     lobbyState.players.map(async (e) => await DotaBot.invitePlayer(dotaBot)(e));
+    if (!lobbyState.readyCheckTime) {
+      lobbyState.readyCheckTime = new Date();
+    }
+    this.registerLobbyTimeout(lobbyState);
     lobbyState.state = CONSTANTS.STATE_WAITING_FOR_PLAYERS;
     await Db.updateLobby(lobbyState);
     // this[CONSTANTS.MSG_LOBBY_INVITES_SENT](lobbyState);
@@ -379,8 +381,17 @@ const LobbyStateHandlers = ({ DotaBot, Db, Lobby, MatchTracker }) => ({
     if (dotaBot) {
       if (DotaBot.isDotaLobbyReady(dotaBot.teamCache, dotaBot.playerState)) {
         logger.debug("lobby run isDotaLobbyReady true");
+        this.unregisterLobbyTimeout(lobbyState);
+
         await this.onLobbybalanceShuffle(lobbyState);
         return this.onStartDotaLobby(lobbyState, dotaBot);
+      } else if (Lobby.isReadyCheckTimedOut(lobbyState)) {
+        lobbyState.state = CONSTANTS.STATE_MATCH_NO_STATS;
+
+        lobbyState.joinedPlayers = dotaBot.playerState;
+        lobbyState.readyCheckTime = null;
+        await Db.updateLobby(lobbyState);
+      } else {
       }
     } else {
       lobbyState.state = CONSTANTS.STATE_WAITING_FOR_PLAYERS;

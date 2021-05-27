@@ -167,6 +167,9 @@ const resetLobbyState = async (_lobbyState) => {
   return lobbyState;
 };
 
+const isReadyCheckTimedOut = (lobbyState) =>
+  Date.now() - lobbyState.readyCheckTime >= lobbyState.readyCheckTimeout;
+
 const formatNameForLobby = (input) =>
   input.replace(/[^0-9a-z]/gi, "").substring(0, 15);
 
@@ -174,6 +177,14 @@ const assignGameMode = async (lobbyState) => ({
   ...lobbyState,
   gameMode: CONSTANTS.DOTA_GAMEMODE_1V1MID,
 });
+
+const assignReadyCheckTimeout = async (lobbyState) => {
+  let { readyCheckTimeout } = await Db.getDefaults();
+  return {
+    ...lobbyState,
+    readyCheckTimeout,
+  };
+};
 
 const addPlayer = (lobbyOrState, player) => Db.addPlayer(lobbyOrState, player);
 const updateLobbyPlayerBySteamId = async (data, lobbyOrState, steamId64) => {
@@ -258,10 +269,12 @@ module.exports = {
   formatNameForLobby,
   // getLobbyNameFromCaptains,
   resetLobbyState,
+  isReadyCheckTimedOut,
   // createChallengeLobby,
   // forceLobbyDraft,
   // removeLobbyPlayersFromQueues,
   assignLobbyName,
+  assignReadyCheckTimeout,
   // reducePlayerToTeamCache,
   // createLobbyStateMessage,
   // setLobbyTopic,

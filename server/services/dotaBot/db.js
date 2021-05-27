@@ -3,6 +3,7 @@ var dotaLobbyModel = require("../../models/dotaLobby.model");
 var dotaLobbyPlayerModel = require("../../models/dotaLobbyPlayer.model");
 var dotaMatchModel = require("../../models/dotaMatch.model");
 var dotaBotAdminModel = require("../../models/dotaBotAdmin.model");
+var dotaDefaultsModel = require("../../models/dotaDefaults.model");
 const util = require("util");
 
 const logger = require("./logger");
@@ -213,9 +214,9 @@ module.exports.findUnassignedBot = async () => {
         status: {
           $in: [CONSTANTS.BOT_OFFLINE, CONSTANTS.BOT_IDLE],
         },
-        lobbyCount: {
-          $lt: 5,
-        },
+        // lobbyCount: {
+        //   $lt: 5,
+        // },
       })
       .lean(true)
       .exec();
@@ -1126,6 +1127,21 @@ module.exports.CreateMatchData = async (matchId, odotaData) => {
     let result = await dotaMatchModel.create({ matchId, odotaData });
 
     return result._doc.odotaData;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
+
+module.exports.getDefaults = async () => {
+  try {
+    const result = await dotaDefaultsModel
+      .findOne({})
+      .lean(true)
+      .exec();
+    logger.debug(`DB getDefaults   --> ${util.inspect(result)}`);
+    return result;
   } catch (err) {
     logger.error(err);
     throw err.message;
