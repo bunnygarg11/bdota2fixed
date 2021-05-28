@@ -129,6 +129,10 @@ const EventListeners = ({ Db }) => ({
   async [CONSTANTS.EVENT_DISABLE_MATCH_TRACKER]() {
     return this.queueEvent(this.disableMatchTracker);
   },
+
+  async [CONSTANTS.EVENT_DISABLE_LOBBY_TIMEOUT]() {
+    return this.queueEvent(this.unregisterAllLobbyTimeout);
+  },
 });
 
 module.exports = EventListeners;

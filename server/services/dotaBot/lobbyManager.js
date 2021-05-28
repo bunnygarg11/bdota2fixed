@@ -119,8 +119,8 @@ class LobbyManager extends EventEmitter {
     this.unregisterLobbyTimeout(lobbyState);
     const delay = Math.max(
       0,
-      lobbyState.readyCheckTime +
-        lobbyState.inhouseState.readyCheckTimeout -
+      lobbyState.readyCheckTime.getTime() +
+        lobbyState.readyCheckTimeout -
         Date.now()
     );
     logger.debug(
@@ -147,6 +147,15 @@ class LobbyManager extends EventEmitter {
       clearTimeout(this.lobbyTimeoutTimers[lobbyState._id.toString()]);
     }
     delete this.lobbyTimeoutTimers[lobbyState._id.toString()];
+  }
+
+  unregisterAllLobbyTimeout() {
+    logger.debug(`LobbyManager unregisterAllLobbyTimeout `);
+
+    for (const timeoutId of Object.keys(this.lobbyTimeoutTimers)) {
+      clearTimeout(this.lobbyTimeoutTimers[timeoutId]);
+      delete this.lobbyTimeoutTimers[timeoutId];
+    }
   }
 
   /**
@@ -267,7 +276,7 @@ class LobbyManager extends EventEmitter {
     logger.debug(`LobbyManager onLobbyTimedOut ${lobbyState._id}`);
     delete this.lobbyTimeoutTimers[lobbyState._id.toString()];
     this[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [
-      CONSTANTS.STATE_CHECKING_READY,
+      CONSTANTS.STATE_WAITING_FOR_PLAYERS,
     ]).catch((e) => logger.error(e));
   }
 

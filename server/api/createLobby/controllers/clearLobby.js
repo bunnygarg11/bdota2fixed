@@ -10,7 +10,13 @@ const dotaLobbyPlayerModel = require("../../../models/dotaLobbyPlayer.model");
 
 const _clearLobby = async (req, res, next) => {
   try {
-    await lobbyManager[CONSTANTS.EVENT_DISABLE_MATCH_TRACKER]();
+    if (lobbyManager.matchTracker) {
+      await lobbyManager[CONSTANTS.EVENT_DISABLE_MATCH_TRACKER]();
+    }
+
+    if (lobbyManager.lobbyTimeoutTimers) {
+      await lobbyManager[CONSTANTS.EVENT_DISABLE_LOBBY_TIMEOUT]();
+    }
     let flag = Object.keys(lobbyManager.bots);
 
     let lobbyState = await Db.testFindAllActiveLobbies();

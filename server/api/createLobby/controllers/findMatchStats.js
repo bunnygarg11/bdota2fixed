@@ -27,7 +27,8 @@ const _getMatchStats = async (req, res, next) => {
     ) {
       let result = await Db.getLobbyMatchStats(matchId);
 
-      if (result.length) return Services._response(res, result);
+      if (result.length)
+        return Services._response(res, result, lobbyState.state);
       let _lobbystate = await matchTracker.setMatchDetails(lobbyState);
       if (_lobbystate.odotaData) {
         await matchTracker.setMatchPlayerDetails(_lobbystate);
@@ -35,9 +36,18 @@ const _getMatchStats = async (req, res, next) => {
 
       await Db.updateManyLobby([_lobbystate._id.toString()]);
       result = await Db.getLobbyMatchStats(matchId);
-      if (result.length) return Services._response(res, result);
+      if (result.length)
+        return Services._response(res, result, lobbyState.state);
 
       return Services._noContent(res, "No stats");
+    } else if (lobbyState.state == CONSTANTS.STATE_COMPLETED_NO_STATS) {
+      if (lobbyState.joinedPlayers)
+        return Services._response(
+          res,
+          { joinedPlayers: lobbyState.joinedPlayers },
+          lobbyState.state
+        );
+    } else {
     }
 
     let msg = `The match is currently `;

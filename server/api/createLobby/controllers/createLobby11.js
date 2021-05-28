@@ -36,6 +36,7 @@ const _createsteamlobbyy = async (req, res, next) => {
     // )(lobbyState);
     lobbyState = await Lobby.assignLobbyName(lobbyState);
     lobbyState = await Lobby.assignGameMode(lobbyState);
+    lobbyState = await Lobby.assignReadyCheckTimeout(lobbyState);
     await Db.updateLobby(lobbyState);
     // }
 
