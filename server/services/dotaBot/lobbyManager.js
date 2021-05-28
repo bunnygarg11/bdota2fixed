@@ -76,7 +76,7 @@ class LobbyManager extends EventEmitter {
    * @async
    * @fires module:ihlManager~ready
    */
- async onClientReady() {
+  async onClientReady() {
     // logger.debug(
     //   `LobbyManager onClientReady logged in as ${this.client.user.tag}`
     // );
@@ -127,6 +127,15 @@ class LobbyManager extends EventEmitter {
       clearTimeout(this.lobbyTimeoutTimers[lobbyState._id.toString()]);
     }
     delete this.lobbyTimeoutTimers[lobbyState._id.toString()];
+  }
+
+  unregisterAllLobbyTimeout() {
+    logger.debug(`LobbyManager unregisterAllLobbyTimeout `);
+
+    for (const timeoutId of Object.keys(this.lobbyTimeoutTimers)) {
+      clearTimeout(this.lobbyTimeoutTimers[timeoutId]);
+      delete this.lobbyTimeoutTimers[timeoutId];
+    }
   }
 
   /**
