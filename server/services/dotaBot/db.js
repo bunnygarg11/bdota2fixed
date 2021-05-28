@@ -252,21 +252,8 @@ module.exports.findassignedBot = async () => {
 
 module.exports.assignBotToLobby = async (lobby, botId) => {
   try {
-    await dotaLobbyModel
-      .findOneAndUpdate(
-        {
-          _id: lobby._id,
-          state: { $ne: CONSTANTS.DELETED },
-        },
-        {
-          botId,
-        },
-        {
-          new: true,
-        }
-      )
-      .lean(true)
-      .exec();
+
+
     const result = await dotaBotModel
       .findOneAndUpdate(
         {
@@ -284,6 +271,31 @@ module.exports.assignBotToLobby = async (lobby, botId) => {
       )
       .lean(true)
       .exec();
+
+    let {leagueid} = await dotaBotAdminModel
+      .findOne({
+        status: "ACTIVE",
+        steamId64:result.steamId64
+      })
+      .lean(true)
+      .exec();
+    await dotaLobbyModel
+      .findOneAndUpdate(
+        {
+          _id: lobby._id,
+          state: { $ne: CONSTANTS.DELETED },
+        },
+        {
+          botId,
+          leagueid
+        },
+        {
+          new: true,
+        }
+      )
+      .lean(true)
+      .exec();
+    
     logger.debug(
       `DB assignBotToLobby lobby ${lobby} botId ${botId}  --> ${util.inspect(
         result

@@ -244,46 +244,47 @@ const connectDotaBot = async (dotaBot) => {
   return dotaBot;
 };
 
-const createDotaBotLobby = ({ lobbyName, password, gameMode }) => async (
-  dotaBot
-) => {
-  // const cmPick =
-  //   radiantFaction === firstPick
-  //     ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
-  //     : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
-  const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
-  logger.debug(
-    `DotaBot createDotaBotLobby ${lobbyName} ${password}  ${gameMode} ${gameModeValue}  ${dotaBot.steamId64}`
-  );
-  const result = await dotaBot.createPracticeLobby({
-    game_name: lobbyName,
-    pass_key: password,
-    game_mode: gameModeValue,
-  });
-  if (result) {
-    logger.debug("DotaBot createDotaBotLobby practice lobby created");
-    // await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IN_LOBBY)(
-    //   dotaBot.steamId64
-    // );
-
-    await Db.updateBotStatusBySteamId(
-      CONSTANTS.BOT_IN_LOBBY,
-      dotaBot.steamId64
+const createDotaBotLobby =
+  ({ lobbyName, password, gameMode, leagueid }) =>
+  async (dotaBot) => {
+    // const cmPick =
+    //   radiantFaction === firstPick
+    //     ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
+    //     : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
+    const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
+    logger.debug(
+      `DotaBot createDotaBotLobby ${lobbyName} ${password}  ${gameMode} ${gameModeValue}  ${dotaBot.steamId64}`
     );
+    const result = await dotaBot.createPracticeLobby({
+      game_name: lobbyName,
+      pass_key: password,
+      game_mode: gameModeValue,
+      leagueid,
+    });
+    if (result) {
+      logger.debug("DotaBot createDotaBotLobby practice lobby created");
+      // await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IN_LOBBY)(
+      //   dotaBot.steamId64
+      // );
 
-    logger.debug("DotaBot createDotaBotLobby bot status updated");
-    await dotaBot.practiceLobbyKickFromTeam(dotaBot.accountId);
-    await dotaBot.joinLobbyChat();
-    return true;
-  }
-  logger.debug("DotaBot createDotaBotLobby practice lobby failed");
-  //   await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE)(dotaBot.steamId64);
+      await Db.updateBotStatusBySteamId(
+        CONSTANTS.BOT_IN_LOBBY,
+        dotaBot.steamId64
+      );
 
-  await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE, dotaBot.steamId64);
-  await dotaBot.leavePracticeLobby();
-  await dotaBot.leaveLobbyChat();
-  return false;
-};
+      logger.debug("DotaBot createDotaBotLobby bot status updated");
+      await dotaBot.practiceLobbyKickFromTeam(dotaBot.accountId);
+      await dotaBot.joinLobbyChat();
+      return true;
+    }
+    logger.debug("DotaBot createDotaBotLobby practice lobby failed");
+    //   await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE)(dotaBot.steamId64);
+
+    await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE, dotaBot.steamId64);
+    await dotaBot.leavePracticeLobby();
+    await dotaBot.leaveLobbyChat();
+    return false;
+  };
 
 const joinDotaBotLobby = ({
   dotaLobbyId,
@@ -291,13 +292,11 @@ const joinDotaBotLobby = ({
   password,
   leagueid,
   gameMode,
-  firstPick,
-  radiantFaction,
 }) => async (dotaBot) => {
-  const cmPick =
-    radiantFaction === firstPick
-      ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
-      : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
+  // const cmPick =
+    // radiantFaction === firstPick
+    //   ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
+    //   : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
   const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
   logger.debug(
     `DotaBot joinDotaBotLobby ${lobbyName} ${password} ${
@@ -309,7 +308,7 @@ const joinDotaBotLobby = ({
     pass_key: password,
     leagueid,
     game_mode: gameModeValue,
-    cm_pick: cmPick,
+    // cm_pick: cmPick,
   };
   const result = await dotaBot.joinPracticeLobby(dotaLobbyId, options);
   if (result) {

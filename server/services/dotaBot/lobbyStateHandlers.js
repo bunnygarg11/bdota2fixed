@@ -284,12 +284,20 @@ await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
     if (
       lobbyState.botId != null &&
       botstatus &&
-      [CONSTANTS.BOT_ONLINE, CONSTANTS.BOT_OFFLINE].includes(botstatus.status)
+      [
+        CONSTANTS.BOT_ONLINE,
+        CONSTANTS.BOT_OFFLINE,
+        CONSTANTS.BOT_IDLE,
+      ].includes(botstatus.status)
     ) {
       const dotaBot = await this.loadBotById(lobbyState.botId);
       if (dotaBot) {
         // check if bot is in another lobby already
-        if (dotaBot.dotaLobbyId && dotaBot.dotaLobbyId.isZero()) {
+        if (
+          dotaBot.dotaLobbyId &&
+          (dotaBot.dotaLobbyId.isZero() ||
+            equalsLong(lobbyState.dotaLobbyId, dotaBot.dotaLobbyId))
+        ) {
           // const tickets = await DotaBot.loadDotaBotTickets(dotaBot);
           // check if bot has ticket if needed
 
@@ -298,8 +306,9 @@ await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
             // leagueid: lobbyState.inhouseState.leagueid,
           };
           try {
-            const enterLobbyP =
-              DotaBot.createDotaBotLobby(lobbyOptions)(dotaBot);
+            const enterLobbyP = lobbyState.dotaLobbyId
+              ? DotaBot.joinDotaBotLobby(lobbyOptions)(dotaBot)
+              : DotaBot.createDotaBotLobby(lobbyOptions)(dotaBot);
             const inLobby = await enterLobbyP;
             if (inLobby) {
               lobbyState.dotaLobbyId = dotaBot.dotaLobbyId.isZero()

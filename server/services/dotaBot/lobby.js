@@ -137,13 +137,13 @@ const resetLobbyState = async (_lobbyState) => {
   const lobbyState = { ..._lobbyState };
   switch (lobbyState.state) {
     case CONSTANTS.STATE_MATCH_IN_PROGRESS:
-      // if (!lobbyState.leagueid) {
-      //   lobbyState.state = CONSTANTS.STATE_MATCH_NO_STATS;
-      //   logger.debug(
-      //     `resetLobbyState ${_lobbyState._id} ${_lobbyState.state} to ${lobbyState.state}`
-      //   );
-      //   break;
-      // }
+      if (!lobbyState.leagueid) {
+        lobbyState.state = CONSTANTS.STATE_MATCH_NO_STATS;
+        logger.debug(
+          `resetLobbyState ${_lobbyState._id} ${_lobbyState.state} to ${lobbyState.state}`
+        );
+        break;
+      }
     // falls through
     case CONSTANTS.STATE_WAITING_FOR_PLAYERS:
     // falls through

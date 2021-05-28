@@ -9,7 +9,7 @@ let dotaDefault = new Schema({
     default: "Inhouse Lobby ${lobbyId}",
   },
 
-  leagueid: String,
+  leagueid: Number,
 
   readyCheckTimeout: { type: Number, default: 60000 }, //*********in ms */
 
