@@ -8,15 +8,17 @@ var Services = require("../../../services/network");
 const _createsteamlobbyy = async (req, res, next) => {
   //   const db = await coreDB.openDBConnnection();
   try {
-    const { players } = req.body;
+    let { players } = req.body;
 
     if (
       typeof players !== "object" ||
-      !Array.isArray(players) ||
-      players.length < 2
+      Array.isArray(players) ||
+      Object.keys(players).length < 2
     ) {
       return Services._validationError(res, "provide valid list of players");
     }
+    let teamCache = players;
+    players = Object.keys(players);
 
     let lobbyState = await Db.findActiveLobbiesFormultiUser(players);
 
@@ -29,7 +31,7 @@ const _createsteamlobbyy = async (req, res, next) => {
     // if (lobbyState && lobbyState._id) {
     //   lobbyState = await Db.addPlayer(lobbyState, steamId);
     // } else {
-    lobbyState = await Db.findOrCreatemultiLobby(players);
+    lobbyState = await Db.findOrCreatemultiLobby(teamCache);
     // lobbyState = await Fp.pipeP(
     //   Lobby.assignLobbyName,
     //   Lobby.assignGameMode

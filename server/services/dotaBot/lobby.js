@@ -17,6 +17,10 @@ const getLobby = (lobbyOrState) => {
 const getPlayers = (lobbyOrState) =>
   Db.getLobbyPlayers(lobbyOrState).then((e) => e.players);
 
+
+  const getTeamCache = (lobbyOrState) =>
+    Db.getLobbyTeamCache(lobbyOrState).then((e) => e.teamCache);
+
 const getPlayerByUserId = (lobbyOrState, id) =>
   Db.getLobbyPlayers(lobbyOrState, { players: id });
 
@@ -201,6 +205,7 @@ module.exports = {
   updateLobbyPlayerBySteamId,
   getLobby,
   getPlayers,
+  getTeamCache,
   getPlayerByUserId,
   getPlayerBySteamId,
   // getPlayerByDiscordId,

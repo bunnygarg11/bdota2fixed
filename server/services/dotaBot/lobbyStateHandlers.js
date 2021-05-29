@@ -347,7 +347,7 @@ await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
   async [CONSTANTS.STATE_BOT_STARTED](_lobbyState) {
     const lobbyState = { ..._lobbyState };
     const dotaBot = this.getBot(lobbyState.botId.toString());
-    const players = await Lobby.getPlayers(lobbyState);
+    const players = await Lobby.getTeamCache(lobbyState);
 
     logger.debug(
       `lobby run STATE_BOT_STARTED lobbyState ${util.inspect(
@@ -383,7 +383,7 @@ await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
         logger.debug("lobby run isDotaLobbyReady true");
         this.unregisterLobbyTimeout(lobbyState);
 
-        await this.onLobbybalanceShuffle(lobbyState);
+        // await this.onLobbybalanceShuffle(lobbyState);
         return this.onStartDotaLobby(lobbyState, dotaBot);
       } else if (Lobby.isReadyCheckTimedOut(lobbyState)) {
         lobbyState.state = CONSTANTS.STATE_MATCH_NO_STATS;
