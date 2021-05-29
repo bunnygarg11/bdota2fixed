@@ -312,9 +312,9 @@ class LobbyManager extends EventEmitter {
       logger.debug(
         `LobbyManager onStartDotaLobby matchId ${lobbyState.matchId} leagueid `
       );
-      if (lobbyState.leagueid) {
-        await this.botLeaveLobby(lobbyState);
-      }
+      // if (lobbyState.leagueid) {
+      //   await this.botLeaveLobby(lobbyState);
+      // }
       // await Lobby.removeQueuers(lobbyState);
       await Db.updateLobby(lobbyState);
       // this.matchTracker.addLobby(lobbyState);
