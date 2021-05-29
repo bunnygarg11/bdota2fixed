@@ -411,20 +411,14 @@ module.exports.destroyBotBySteamID64 = async (steamId64) => {
 
 module.exports.findDotaBotCredentials = async (steamId64s) => {
   try {
-
-    if(!steamId64s){
+    if (!steamId64s) {
       const result = await dotaBotAdminModel
         .findOne({
-          
           status: "ACTIVE",
         })
         .lean(true)
         .exec();
-      logger.debug(
-        `DB findDotaBotCredentials   --> ${util.inspect(
-          result
-        )} `
-      );
+      logger.debug(`DB findDotaBotCredentials   --> ${util.inspect(result)} `);
       return result;
     }
     const result = await dotaBotAdminModel
@@ -620,13 +614,14 @@ module.exports.findOrCreateLobby = async (player) => {
   }
 };
 
-module.exports.findOrCreatemultiLobby = async (player) => {
+module.exports.findOrCreatemultiLobby = async (teamCache) => {
   try {
     let result = await dotaLobbyModel.create({
       state: CONSTANTS.STATE_WAITING_FOR_QUEUE,
       password: hri.random(),
       // lobbyName,
-      players: player,
+      players: Object.keys(teamCache),
+      teamCache,
     });
 
     return result._doc;
@@ -905,6 +900,31 @@ module.exports.getLobbyPlayers = async (lobbyOrState, options) => {
   }
 };
 
+module.exports.getLobbyTeamCache = async (lobbyOrState, options) => {
+  try {
+    if (options) options.state = options.state || { $ne: CONSTANTS.DELETED };
+    let condition = options
+      ? {
+          _id: lobbyOrState._id,
+          ...options,
+        }
+      : {
+          _id: lobbyOrState._id,
+          state: { $ne: CONSTANTS.DELETED },
+        };
+    const result = await dotaLobbyModel
+      .findOne(condition)
+      .select("teamCache")
+      .lean(true)
+      .exec();
+    logger.debug(`DB getLobbyPlayers    --> ${util.inspect(result)}`);
+    return result;
+  } catch (err) {
+    logger.error(err);
+    throw err.message;
+  }
+};
+
 module.exports.addPlayer = async (lobbyOrState, player) => {
   try {
     const result = await dotaLobbyModel
@@ -1133,13 +1153,9 @@ module.exports.CreateMatchData = async (matchId, odotaData) => {
   }
 };
 
-
 module.exports.getDefaults = async () => {
   try {
-    const result = await dotaDefaultsModel
-      .findOne({})
-      .lean(true)
-      .exec();
+    const result = await dotaDefaultsModel.findOne({}).lean(true).exec();
     logger.debug(`DB getDefaults   --> ${util.inspect(result)}`);
     return result;
   } catch (err) {

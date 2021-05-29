@@ -63,6 +63,7 @@ let dotalobby = new Schema({
   },
 
   players: [{ type: String }],
+  teamCache: Object,
 
   createdOn: { type: Date, default: Date.now },
   updatedOn: { type: Date, default: Date.now },

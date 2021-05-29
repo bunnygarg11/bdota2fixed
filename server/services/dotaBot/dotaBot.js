@@ -23,7 +23,7 @@ const validBotLobbyStates = [
   CONSTANTS.STATE_BOT_ASSIGNED,
   CONSTANTS.STATE_BOT_STARTED,
   CONSTANTS.STATE_WAITING_FOR_PLAYERS,
-  CONSTANTS.STATE_MATCH_IN_PROGRESS
+  CONSTANTS.STATE_MATCH_IN_PROGRESS,
 ];
 
 const slotToTeam = (slot) => {
@@ -58,10 +58,16 @@ const updatePlayerState = (steamId64, slot, playerState) => {
 };
 
 const isDotaLobbyReady = (teamCache, playerState) => {
-  // for (const [steamId64, team] of Object.entries(teamCache)) {
-  //   if (playerState[steamId64] !== team) return false;
-  // }
-  // return true;
+  logger.debug(
+    `dotaBot isDotaLobbyReady teamCache ${util.inspect(
+      teamCache
+    )} playerState ${util.inspect(playerState)} `
+  );
+
+  for (const [steamId64, team] of Object.entries(teamCache)) {
+    if (playerState[steamId64] !== team) return false;
+  }
+  return true;
 
   // for (let e of teamCache) {
   //   if (Object.keys(playerState).indexOf(e) == -1) {
@@ -69,23 +75,23 @@ const isDotaLobbyReady = (teamCache, playerState) => {
   //   }
   // }
 
-  logger.debug(
-    `dotaBot isDotaLobbyReady teamCache ${util.inspect(
-      teamCache
-    )} playerState ${util.inspect(playerState)} `
-  );
+  // logger.debug(
+  //   `dotaBot isDotaLobbyReady teamCache ${util.inspect(
+  //     teamCache
+  //   )} playerState ${util.inspect(playerState)} `
+  // );
 
-  if (teamCache.length && Object.keys(playerState).length) {
-    for (let e of teamCache) {
-      if (Object.keys(playerState).indexOf(e) == -1) {
-        return false;
-      }
-    }
+  // if (teamCache.length && Object.keys(playerState).length) {
+  //   for (let e of teamCache) {
+  //     if (Object.keys(playerState).indexOf(e) == -1) {
+  //       return false;
+  //     }
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
-  return false;
+  // return false;
   // return true;
 };
 
@@ -158,7 +164,7 @@ const defaultLobbyOptions = {
   allchat: true,
   visibility: Dota2.schema.DOTALobbyVisibility.DOTALobbyVisibility_Public,
   cm_pick: Dota2.schema.DOTA_CM_PICK.DOTA_CM_RANDOM,
-  leagueid: 13130
+  leagueid: 13130,
 };
 
 const createSteamClient = () => new steam.SteamClient();
@@ -184,7 +190,8 @@ const intersectMembers = (membersA = [], membersB = []) =>
 const membersToPlayerState = (members) => {
   const playerState = {};
   for (const member of members) {
-    if (member.slot) playerState[member.id.toString()] = member.slot;
+    if (member.slot)
+      playerState[member.id.toString()] = slotToTeam(member.team);
   }
   logger.debug(
     `membersToPlayerState playerState ${util.inspect(
@@ -203,20 +210,20 @@ const processMembers = (oldMembers = [], newMembers = []) => {
 
   logger.debug(`dotabot processMembers  `);
 
-  // for (const oldMember of oldMembers) {
-  //   const newMember = newMembers.find(
-  //     (member) => oldMember.id.compare(member.id) === 0
-  //   );
-  //   if (
-  //     newMember &&
-  //     (oldMember.team !== newMember.team || oldMember.slot !== newMember.slot)
-  //   ) {
-  //     members.changedSlot.push({
-  //       previous: oldMember,
-  //       current: newMember,
-  //     });
-  //   }
-  // }
+  for (const oldMember of oldMembers) {
+    const newMember = newMembers.find(
+      (member) => oldMember.id.compare(member.id) === 0
+    );
+    if (
+      newMember &&
+      (oldMember.team !== newMember.team || oldMember.slot !== newMember.slot)
+    ) {
+      members.changedSlot.push({
+        previous: oldMember,
+        current: newMember,
+      });
+    }
+  }
 
   return members;
 };
@@ -244,95 +251,97 @@ const connectDotaBot = async (dotaBot) => {
   return dotaBot;
 };
 
-const createDotaBotLobby = ({ lobbyName, password, gameMode }) => async (
-  dotaBot
-) => {
-  // const cmPick =
-  //   radiantFaction === firstPick
-  //     ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
-  //     : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
-  const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
-  logger.debug(
-    `DotaBot createDotaBotLobby ${lobbyName} ${password}  ${gameMode} ${gameModeValue}  ${dotaBot.steamId64}`
-  );
-  const result = await dotaBot.createPracticeLobby({
-    game_name: lobbyName,
-    pass_key: password,
-    game_mode: gameModeValue,
-  });
-  if (result) {
-    logger.debug("DotaBot createDotaBotLobby practice lobby created");
-    // await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IN_LOBBY)(
-    //   dotaBot.steamId64
-    // );
-
-    await Db.updateBotStatusBySteamId(
-      CONSTANTS.BOT_IN_LOBBY,
-      dotaBot.steamId64
+const createDotaBotLobby =
+  ({ lobbyName, password, gameMode }) =>
+  async (dotaBot) => {
+    // const cmPick =
+    //   radiantFaction === firstPick
+    //     ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
+    //     : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
+    const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
+    logger.debug(
+      `DotaBot createDotaBotLobby ${lobbyName} ${password}  ${gameMode} ${gameModeValue}  ${dotaBot.steamId64}`
     );
+    const result = await dotaBot.createPracticeLobby({
+      game_name: lobbyName,
+      pass_key: password,
+      game_mode: gameModeValue,
+    });
+    if (result) {
+      logger.debug("DotaBot createDotaBotLobby practice lobby created");
+      // await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IN_LOBBY)(
+      //   dotaBot.steamId64
+      // );
 
-    logger.debug("DotaBot createDotaBotLobby bot status updated");
-    await dotaBot.practiceLobbyKickFromTeam(dotaBot.accountId);
-    await dotaBot.joinLobbyChat();
-    return true;
-  }
-  logger.debug("DotaBot createDotaBotLobby practice lobby failed");
-  //   await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE)(dotaBot.steamId64);
+      await Db.updateBotStatusBySteamId(
+        CONSTANTS.BOT_IN_LOBBY,
+        dotaBot.steamId64
+      );
 
-  await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE, dotaBot.steamId64);
-  await dotaBot.leavePracticeLobby();
-  await dotaBot.leaveLobbyChat();
-  return false;
-};
+      logger.debug("DotaBot createDotaBotLobby bot status updated");
+      await dotaBot.practiceLobbyKickFromTeam(dotaBot.accountId);
+      await dotaBot.joinLobbyChat();
+      return true;
+    }
+    logger.debug("DotaBot createDotaBotLobby practice lobby failed");
+    //   await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE)(dotaBot.steamId64);
 
-const joinDotaBotLobby = ({
-  dotaLobbyId,
-  lobbyName,
-  password,
-  leagueid,
-  gameMode,
-  firstPick,
-  radiantFaction,
-}) => async (dotaBot) => {
-  const cmPick =
-    radiantFaction === firstPick
-      ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
-      : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
-  const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
-  logger.debug(
-    `DotaBot joinDotaBotLobby ${lobbyName} ${password} ${
-      leagueid || "leagueid"
-    } ${gameMode} ${gameModeValue} ${cmPick || "cmPick"}`
-  );
-  const options = {
-    game_name: lobbyName,
-    pass_key: password,
-    leagueid,
-    game_mode: gameModeValue,
-    cm_pick: cmPick,
+    await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE, dotaBot.steamId64);
+    await dotaBot.leavePracticeLobby();
+    await dotaBot.leaveLobbyChat();
+    return false;
   };
-  const result = await dotaBot.joinPracticeLobby(dotaLobbyId, options);
-  if (result) {
-    // await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IN_LOBBY)(
-    //   dotaBot.steamId64
-    // );
 
-    await Db.updateBotStatusBySteamId(
-      CONSTANTS.BOT_IN_LOBBY,
-      dotaBot.steamId64
+const joinDotaBotLobby =
+  ({
+    dotaLobbyId,
+    lobbyName,
+    password,
+    leagueid,
+    gameMode,
+    firstPick,
+    radiantFaction,
+  }) =>
+  async (dotaBot) => {
+    const cmPick =
+      radiantFaction === firstPick
+        ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
+        : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
+    const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
+    logger.debug(
+      `DotaBot joinDotaBotLobby ${lobbyName} ${password} ${
+        leagueid || "leagueid"
+      } ${gameMode} ${gameModeValue} ${cmPick || "cmPick"}`
     );
+    const options = {
+      game_name: lobbyName,
+      pass_key: password,
+      leagueid,
+      game_mode: gameModeValue,
+      cm_pick: cmPick,
+    };
+    const result = await dotaBot.joinPracticeLobby(dotaLobbyId, options);
+    if (result) {
+      // await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IN_LOBBY)(
+      //   dotaBot.steamId64
+      // );
 
-    await dotaBot.configPracticeLobby(options);
-    await dotaBot.joinLobbyChat();
-    return true;
-  }
-  //   await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE)(dotaBot.steamId64);
+      await Db.updateBotStatusBySteamId(
+        CONSTANTS.BOT_IN_LOBBY,
+        dotaBot.steamId64
+      );
 
-  await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE, dotaBot.steamId64);
-  await dotaBot.leavePracticeLobby();
-  await dotaBot.leaveLobbyChat();
-  return false;
-};
+      await dotaBot.configPracticeLobby(options);
+      await dotaBot.joinLobbyChat();
+      return true;
+    }
+    //   await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE)(dotaBot.steamId64);
+
+    await Db.updateBotStatusBySteamId(CONSTANTS.BOT_IDLE, dotaBot.steamId64);
+    await dotaBot.leavePracticeLobby();
+    await dotaBot.leaveLobbyChat();
+    return false;
+  };
 
 /**
  * Start a dota lobby and return the match id.
@@ -397,7 +406,7 @@ class DotaBot extends EventEmitter {
     this._connectionAttempts = 0;
     this._connecting = false;
     this.lobbyOptions = {};
-    this._teamCache = [];
+    this._teamCache = {};
     this._queue = new Queue(null, null, true);
     this.config = config;
     this.steamClient = steamClient;
@@ -446,7 +455,6 @@ class DotaBot extends EventEmitter {
         lobby.match_outcome ===
           Dota2.schema.EMatchOutcome.k_EMatchOutcome_DireVictory
       ) {
-
         logger.debug(`dotaBot EVENT_MATCH_OUTCOME  `);
         this.emit(
           CONSTANTS.EVENT_MATCH_OUTCOME,
@@ -468,9 +476,9 @@ class DotaBot extends EventEmitter {
           return null;
         } else if (lobbyState.botId.toString() != this.config._id.toString()) {
           logger.debug(
-            `DotaBot practiceLobbyUpdate lobbyState.botId ${lobbyState.botId} mismatch. Bot ${
-              this.config._id || "id"
-            } leaving lobby...`
+            `DotaBot practiceLobbyUpdate lobbyState.botId ${
+              lobbyState.botId
+            } mismatch. Bot ${this.config._id || "id"} leaving lobby...`
           );
 
           // return null
@@ -878,33 +886,33 @@ class DotaBot extends EventEmitter {
       // this.emit(CONSTANTS.MSG_LOBBY_PLAYER_JOINED, member);
     }
 
-    // for (const memberState of members.changedSlot) {
-    //   logger.debug(
-    //     `DotaBot processLobbyUpdate member slot changed ${util.inspect(
-    //       memberState.previous
-    //     )} => ${util.inspect(memberState.current)}`
-    //   );
+    for (const memberState of members.changedSlot) {
+      logger.debug(
+        `DotaBot processLobbyUpdate member slot changed ${util.inspect(
+          memberState.previous
+        )} => ${util.inspect(memberState.current)}`
+      );
     //   // this.emit(CONSTANTS.MSG_LOBBY_PLAYER_CHANGED_SLOT, memberState);
-    //   const steamId64 = memberState.current.id.toString();
-    //   logger.debug(
-    //     `DotaBot processLobbyUpdate steamId64 ${steamId64} teamCache ${
-    //       this.teamCache[steamId64]
-    //     } slotToTeam ${slotToTeam(memberState.current.team)}`
-    //   );
-    //   if (Object.prototype.hasOwnProperty.call(this.teamCache, steamId64)) {
-    //     if (
-    //       this.teamCache[steamId64] !== slotToTeam(memberState.current.team)
-    //     ) {
-    //       const accountId = parseInt(convertor.to32(steamId64));
-    //       logger.debug(
-    //         `DotaBot processLobbyUpdate slot change mismatch. kicking ${accountId} ${typeof accountId}`
-    //       );
-    //       this.practiceLobbyKickFromTeam(accountId).catch((e) =>
-    //         logger.error(e)
-    //       );
-    //     }
-    //   }
-    // }
+      const steamId64 = memberState.current.id.toString();
+      logger.debug(
+        `DotaBot processLobbyUpdate steamId64 ${steamId64} teamCache ${
+          this.teamCache[steamId64]
+        } slotToTeam ${slotToTeam(memberState.current.team)}`
+      );
+      if (Object.prototype.hasOwnProperty.call(this.teamCache, steamId64)) {
+        if (
+          this.teamCache[steamId64] !== slotToTeam(memberState.current.team)
+        ) {
+          const accountId = parseInt(convertor.to32(steamId64));
+          logger.debug(
+            `DotaBot processLobbyUpdate slot change mismatch. kicking ${accountId} ${typeof accountId}`
+          );
+          this.practiceLobbyKickFromTeam(accountId).catch((e) =>
+            logger.error(e)
+          );
+        }
+      }
+    }
 
     if (
       isDotaLobbyReady(
