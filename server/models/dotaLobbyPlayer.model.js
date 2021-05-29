@@ -12,6 +12,7 @@ let dotaLobbyPlayer = new Schema({
     type: Boolean,
     default: false,
   },
+  team: Number,
   heroId: {
     // allowNull: false,
     type: Number,

@@ -31,6 +31,7 @@ const setMatchPlayerDetails = (matchOutcome) => (members) => async (_lobby) => {
         // win: 0,
         // lose: 0,
         heroId: playerData.hero_id,
+        team: playerData.team,
         // kills: 0,
         // deaths: 0,
         // assists: 0,
