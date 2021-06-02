@@ -400,7 +400,7 @@ await Lobby.mapPlayers(Db.destroyAllAcceptedChallengeForUser)(lobbyState);
         logger.debug("lobby run isDotaLobbyReady true");
         this.unregisterLobbyTimeout(lobbyState);
 
-        await this.onLobbybalanceShuffle(lobbyState);
+        // await this.onLobbybalanceShuffle(lobbyState);
         return this.onStartDotaLobby(lobbyState, dotaBot);
       } else if (Lobby.isReadyCheckTimedOut(lobbyState)) {
         lobbyState.state = CONSTANTS.STATE_MATCH_NO_STATS;

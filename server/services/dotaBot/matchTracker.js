@@ -37,10 +37,8 @@ const updatePlayerRatings = async (lobbyState) => {
       Fp.allPromise([
         Lobby.updateLobbyPlayer({ ratingDiff: D1 })(lobby)(player.id),
         Db.updateUserRating(player)(player.rating + D1),
-        Db.findOrCreateLeaderboard(lobby)(player)(
-          player.rating + D1
-        ).then((leaderboard) =>
-          Db.incrementLeaderboardRecord(S1)(S2)(leaderboard)
+        Db.findOrCreateLeaderboard(lobby)(player)(player.rating + D1).then(
+          (leaderboard) => Db.incrementLeaderboardRecord(S1)(S2)(leaderboard)
         ),
       ])
     ),
@@ -48,10 +46,8 @@ const updatePlayerRatings = async (lobbyState) => {
       Fp.allPromise([
         Lobby.updateLobbyPlayer({ ratingDiff: D2 })(lobby)(player.id),
         Db.updateUserRating(player)(player.rating + D2),
-        Db.findOrCreateLeaderboard(lobby)(player)(
-          player.rating + D1
-        ).then((leaderboard) =>
-          Db.incrementLeaderboardRecord(S2)(S1)(leaderboard)
+        Db.findOrCreateLeaderboard(lobby)(player)(player.rating + D1).then(
+          (leaderboard) => Db.incrementLeaderboardRecord(S2)(S1)(leaderboard)
         ),
       ])
     ),
@@ -96,9 +92,7 @@ const setMatchDetails = async (lobbyOrState) => {
     if (odotaData) {
       lobby = await Db.updateLobby({
         odotaData,
-        finishedAt: new Date(
-          (odotaData.start_time + odotaData.duration) * 1000
-        ),
+        finishedAt: new Date(odotaData.start_time + odotaData.duration * 1000),
         _id: lobby._id,
       });
     }
@@ -222,9 +216,9 @@ const createMatchEndMessageEmbed = async (matchId) => {
 
   const duration = `${
     durationHours > 0 ? `${durationHours.toString()}:` : ""
-  }${`${durationMinutes
+  }${`${durationMinutes.toString().padStart(2, "0")}:`}${durationSeconds
     .toString()
-    .padStart(2, "0")}:`}${durationSeconds.toString().padStart(2, "0")}`;
+    .padStart(2, "0")}`;
 
   const description = `**${winner}** Victory!
 Match ID: ${matchId} [DB](https://www.dotabuff.com/matches/${matchId})/[OD](https://www.opendota.com/matches/${matchId})/[SZ](https://stratz.com/en-us/match/${matchId})`;
@@ -276,8 +270,7 @@ class MatchTracker extends EventEmitter {
   }
 
   async loadLobbies() {
-    
-   let lobbies = await Db.findAllMatchEndedLobbies();
+    let lobbies = await Db.findAllMatchEndedLobbies();
     this.lobbies.push(
       ...lobbies.map((lobby) => ({
         lobby,
