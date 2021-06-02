@@ -91,7 +91,7 @@ class LobbyManager extends EventEmitter {
       this[CONSTANTS.EVENT_MATCH_NO_STATS](lobby).catch((e) => logger.error(e))
     );
 
-    await Fp.mapPromise(this.runLobbiesForInhouse.bind(this))();
+    await this.runLobbiesForInhouse.bind(this)();
     await this.matchTracker.loadLobbies();
     this.matchTracker.run();
 

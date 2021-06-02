@@ -475,6 +475,7 @@ module.exports.findAllActiveLobbies = async () => {
             CONSTANTS.STATE_KILLED,
             CONSTANTS.STATE_FAILED,
             CONSTANTS.DELETED,
+            CONSTANTS.STATE_BOT_FAILED,
           ],
         },
       })
@@ -499,6 +500,7 @@ module.exports.findActiveLobbiesForUser = async (userId) => {
             CONSTANTS.STATE_KILLED,
             CONSTANTS.STATE_FAILED,
             CONSTANTS.DELETED,
+            CONSTANTS.STATE_BOT_FAILED
           ],
         },
         players: userId,

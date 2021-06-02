@@ -301,7 +301,7 @@ const joinDotaBotLobby = ({
   logger.debug(
     `DotaBot joinDotaBotLobby ${lobbyName} ${password} ${
       leagueid || "leagueid"
-    } ${gameMode} ${gameModeValue} ${cmPick || "cmPick"}`
+    } ${gameMode} ${gameModeValue} `
   );
   const options = {
     game_name: lobbyName,
