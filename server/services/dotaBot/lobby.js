@@ -34,8 +34,8 @@ const unassignBotFromLobby = async (lobbyState) => {
 };
 
 const assignBotToLobby = async (lobbyState, botId) => {
-  await Db.assignBotToLobby(lobbyState, botId);
-  return { ...lobbyState, botId };
+ const _lobbyState= await Db.assignBotToLobby(lobbyState, botId);
+  return { ..._lobbyState, botId };
 };
 
 const checkPlayers = async (lobbyState) => {

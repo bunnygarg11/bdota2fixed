@@ -6,13 +6,14 @@ const adminList = [
     personaName: "my*****Name",
     steam_guard_code: "3DW4R",
     password: "St3@mAccountToBu!dlovelyAPI69",
+    leagueid: 13130,
   },
 ];
 
 const defaultList = [
   {
     lobbyNameTemplate: "Inhouse Lobby ${lobbyId}",
-    leagueid:3401,
+    leagueid: 13130,
     readyCheckTimeout: 240000,
     defaultGameMode: "DOTA_GAMEMODE_1V1MID",
     PlayersLength: 2,

@@ -90,6 +90,26 @@ class LobbyManager extends EventEmitter {
     this.matchTracker.on(CONSTANTS.EVENT_MATCH_NO_STATS, (lobby) =>
       this[CONSTANTS.EVENT_MATCH_NO_STATS](lobby).catch((e) => logger.error(e))
     );
+
+    // await this.runLobbiesForInhouse.bind(this)();
+    await this.matchTracker.loadLobbies();
+    this.matchTracker.run();
+
+    // await Db.setAllBotsOffline();
+  }
+
+  async runLobbiesForInhouse() {
+    logger.silly(`ihlManager runLobbiesForInhouse `);
+    const lobbies = await Db.findAllActiveLobbies();
+    return Fp.allPromise(
+      lobbies.map((lobby) =>
+        Lobby.resetLobbyState(lobby).then((lobbyState) => {
+          this[CONSTANTS.EVENT_RUN_LOBBY](lobbyState, [lobbyState.state]).catch(
+            (e) => logger.error(e)
+          );
+        })
+      )
+    );
   }
 
   /**
@@ -292,9 +312,9 @@ class LobbyManager extends EventEmitter {
       logger.debug(
         `LobbyManager onStartDotaLobby matchId ${lobbyState.matchId} leagueid `
       );
-      if (lobbyState.leagueid) {
-        await this.botLeaveLobby(lobbyState);
-      }
+      // if (lobbyState.leagueid) {
+      //   await this.botLeaveLobby(lobbyState);
+      // }
       // await Lobby.removeQueuers(lobbyState);
       await Db.updateLobby(lobbyState);
       // this.matchTracker.addLobby(lobbyState);

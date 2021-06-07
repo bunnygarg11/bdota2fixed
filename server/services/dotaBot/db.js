@@ -252,21 +252,8 @@ module.exports.findassignedBot = async () => {
 
 module.exports.assignBotToLobby = async (lobby, botId) => {
   try {
-    await dotaLobbyModel
-      .findOneAndUpdate(
-        {
-          _id: lobby._id,
-          state: { $ne: CONSTANTS.DELETED },
-        },
-        {
-          botId,
-        },
-        {
-          new: true,
-        }
-      )
-      .lean(true)
-      .exec();
+
+
     const result = await dotaBotModel
       .findOneAndUpdate(
         {
@@ -284,12 +271,39 @@ module.exports.assignBotToLobby = async (lobby, botId) => {
       )
       .lean(true)
       .exec();
+
+    const {leagueid} = await dotaBotAdminModel
+      .findOne({
+        status: "ACTIVE",
+        steamId64:result.steamId64
+      })
+      .lean(true)
+      .exec();
+  const resul=  await dotaLobbyModel
+      .findOneAndUpdate(
+        {
+          _id: lobby._id,
+          state: { $ne: CONSTANTS.DELETED },
+        },
+        {
+          botId,
+          leagueid
+        },
+        {
+          new: true,
+        }
+      )
+      .lean(true)
+      .exec();
+    
     logger.debug(
-      `DB assignBotToLobby lobby ${lobby} botId ${botId}  --> ${util.inspect(
-        result
+      `DB assignBotToLobby lobby ${util.inspect(
+        lobby
+      )} botId ${botId}  --> ${util.inspect(result)} resul ${util.inspect(
+        resul
       )}`
     );
-    return result;
+    return resul;
   } catch (err) {
     logger.error(err);
     throw err.message;
@@ -463,6 +477,7 @@ module.exports.findAllActiveLobbies = async () => {
             CONSTANTS.STATE_KILLED,
             CONSTANTS.STATE_FAILED,
             CONSTANTS.DELETED,
+            CONSTANTS.STATE_BOT_FAILED,
           ],
         },
       })
@@ -487,6 +502,7 @@ module.exports.findActiveLobbiesForUser = async (userId) => {
             CONSTANTS.STATE_KILLED,
             CONSTANTS.STATE_FAILED,
             CONSTANTS.DELETED,
+            CONSTANTS.STATE_BOT_FAILED
           ],
         },
         players: userId,

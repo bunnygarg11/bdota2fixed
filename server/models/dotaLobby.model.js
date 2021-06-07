@@ -33,6 +33,8 @@ let dotalobby = new Schema({
 
   matchId: String,
 
+  leagueid:Number,
+
   winner: {
     // allowNull: false,
     type: Number,
@@ -50,6 +52,8 @@ let dotalobby = new Schema({
   odotaData: Object,
 
   joinedPlayers: Object,
+
+
 
   setMatchPlayerDetails: {
     type: Boolean,

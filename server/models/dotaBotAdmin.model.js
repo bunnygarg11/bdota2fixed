@@ -23,6 +23,8 @@ const dotaBotAdminSchema = new Schema(
     steam_guard_code: String,
 
     password: String,
+
+    leagueid:Number
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
