@@ -247,13 +247,14 @@ const connectDotaBot = async (dotaBot) => {
 const createDotaBotLobby =
   ({ lobbyName, password, gameMode, leagueid }) =>
   async (dotaBot) => {
+    
     // const cmPick =
     //   radiantFaction === firstPick
     //     ? Dota2.schema.DOTA_CM_PICK.DOTA_CM_GOOD_GUYS
     //     : Dota2.schema.DOTA_CM_PICK.DOTA_CM_BAD_GUYS;
     const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
     logger.debug(
-      `DotaBot createDotaBotLobby ${lobbyName} ${password}  ${gameMode} ${gameModeValue}  ${dotaBot.steamId64}`
+      `DotaBot createDotaBotLobby ${lobbyName} ${password}  ${gameMode} ${gameModeValue}  ${dotaBot.steamId64} leagueid  ${leagueid}`
     );
     const result = await dotaBot.createPracticeLobby({
       game_name: lobbyName,
@@ -300,7 +301,7 @@ const joinDotaBotLobby = ({
   const gameModeValue = Dota2.schema.DOTA_GameMode[gameMode];
   logger.debug(
     `DotaBot joinDotaBotLobby ${lobbyName} ${password} ${
-      leagueid || "leagueid"
+      leagueid 
     } ${gameMode} ${gameModeValue} `
   );
   const options = {
@@ -1202,6 +1203,7 @@ class DotaBot extends EventEmitter {
           Long.fromString(dotaLobbyId),
           this.lobbyOptions.pass_key,
           (err, body) => {
+            logger.debug(`DotaBot joinPracticeLobby result ${body.result}`);
             resolve(
               body.result ===
                 Dota2.schema.DOTAJoinLobbyResult.DOTA_JOIN_RESULT_SUCCESS
